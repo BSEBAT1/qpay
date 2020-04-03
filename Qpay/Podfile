@@ -7,4 +7,8 @@ target 'Qpay' do
   # Pods for Qpay
 pod 'Plaid'
 pod 'Firebase/Auth'
+pod 'Firebase/Core'
+pod 'Firebase/Firestore'
+pod 'FBSDKLoginKit'
+pod 'GeoFire'
 end

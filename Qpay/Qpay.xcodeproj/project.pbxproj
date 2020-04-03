@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B2DE4D0E310691A7F4C94B68 /* Pods_Qpay.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 74E36AACFAE1904A16E12D9D /* Pods_Qpay.framework */; };
 		F51E24AA24325DED007C93A6 /* CustomerTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F51E24A924325DED007C93A6 /* CustomerTableViewController.swift */; };
 		F51E24B024329D4B007C93A6 /* CustomerDataObj.m in Sources */ = {isa = PBXBuildFile; fileRef = F51E24AF24329D4B007C93A6 /* CustomerDataObj.m */; };
 		F57073192431521900F1F822 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = F57073182431521900F1F822 /* ViewController.m */; };
@@ -14,19 +15,20 @@
 		F5A8A19A2433B00D00843C15 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = F5A8A1992433B00D00843C15 /* GoogleService-Info.plist */; };
 		F5A8A19C2433BA0500843C15 /* Utilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5A8A19B2433BA0400843C15 /* Utilities.swift */; };
 		F5A8A19E2433E12100843C15 /* LoginViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5A8A19D2433E12100843C15 /* LoginViewController.swift */; };
+		F5C279DD24343E2A0046A296 /* SignUpViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5C279DC24343E2A0046A296 /* SignUpViewController.swift */; };
 		F5E0028723C79321000769F5 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5E0028623C79321000769F5 /* AppDelegate.swift */; };
 		F5E0028923C79321000769F5 /* FirstViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5E0028823C79321000769F5 /* FirstViewController.swift */; };
 		F5E0028B23C79322000769F5 /* SecondViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5E0028A23C79321000769F5 /* SecondViewController.swift */; };
 		F5E0028E23C79322000769F5 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = F5E0028C23C79322000769F5 /* Main.storyboard */; };
 		F5E0029023C79322000769F5 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F5E0028F23C79322000769F5 /* Assets.xcassets */; };
 		F5E0029323C79323000769F5 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = F5E0029123C79323000769F5 /* LaunchScreen.storyboard */; };
-		F957A7B220F55E41311A5B31 /* Pods_Qpay.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 76120182139E32B0CE21EA80 /* Pods_Qpay.framework */; };
+		F5F601542436610F004AE421 /* login.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = F5F601532436610F004AE421 /* login.mp4 */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		5EF3B09ECD4827F9F441FB11 /* Pods-Qpay.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Qpay.release.xcconfig"; path = "Target Support Files/Pods-Qpay/Pods-Qpay.release.xcconfig"; sourceTree = "<group>"; };
-		76120182139E32B0CE21EA80 /* Pods_Qpay.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Qpay.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		E1FDC399C90D6986F9A4875C /* Pods-Qpay.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Qpay.debug.xcconfig"; path = "Target Support Files/Pods-Qpay/Pods-Qpay.debug.xcconfig"; sourceTree = "<group>"; };
+		74E36AACFAE1904A16E12D9D /* Pods_Qpay.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Qpay.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		75F37D1AFA80062813F01704 /* Pods-Qpay.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Qpay.debug.xcconfig"; path = "Target Support Files/Pods-Qpay/Pods-Qpay.debug.xcconfig"; sourceTree = "<group>"; };
+		7ED89826FB8E1BE7D63DF155 /* Pods-Qpay.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Qpay.release.xcconfig"; path = "Target Support Files/Pods-Qpay/Pods-Qpay.release.xcconfig"; sourceTree = "<group>"; };
 		F51E24A924325DED007C93A6 /* CustomerTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomerTableViewController.swift; sourceTree = "<group>"; };
 		F51E24AF24329D4B007C93A6 /* CustomerDataObj.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CustomerDataObj.m; sourceTree = "<group>"; };
 		F51E24B124329D70007C93A6 /* CustomerDataObj.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CustomerDataObj.h; sourceTree = "<group>"; };
@@ -37,6 +39,7 @@
 		F5A8A1992433B00D00843C15 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		F5A8A19B2433BA0400843C15 /* Utilities.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Utilities.swift; sourceTree = "<group>"; };
 		F5A8A19D2433E12100843C15 /* LoginViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginViewController.swift; sourceTree = "<group>"; };
+		F5C279DC24343E2A0046A296 /* SignUpViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignUpViewController.swift; sourceTree = "<group>"; };
 		F5E0028323C79321000769F5 /* Qpay.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Qpay.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F5E0028623C79321000769F5 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		F5E0028823C79321000769F5 /* FirstViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirstViewController.swift; sourceTree = "<group>"; };
@@ -45,6 +48,7 @@
 		F5E0028F23C79322000769F5 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		F5E0029223C79323000769F5 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		F5E0029423C79323000769F5 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		F5F601532436610F004AE421 /* login.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = login.mp4; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -52,7 +56,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F957A7B220F55E41311A5B31 /* Pods_Qpay.framework in Frameworks */,
+				B2DE4D0E310691A7F4C94B68 /* Pods_Qpay.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -62,16 +66,16 @@
 		1896BB03E0C15FD173236A21 /* Pods */ = {
 			isa = PBXGroup;
 			children = (
-				E1FDC399C90D6986F9A4875C /* Pods-Qpay.debug.xcconfig */,
-				5EF3B09ECD4827F9F441FB11 /* Pods-Qpay.release.xcconfig */,
+				75F37D1AFA80062813F01704 /* Pods-Qpay.debug.xcconfig */,
+				7ED89826FB8E1BE7D63DF155 /* Pods-Qpay.release.xcconfig */,
 			);
 			path = Pods;
 			sourceTree = "<group>";
 		};
-		E8064C38EE3AEE0436FC71B2 /* Frameworks */ = {
+		BA810157E869D9AC51650301 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				76120182139E32B0CE21EA80 /* Pods_Qpay.framework */,
+				74E36AACFAE1904A16E12D9D /* Pods_Qpay.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -82,7 +86,7 @@
 				F5E0028523C79321000769F5 /* Qpay */,
 				F5E0028423C79321000769F5 /* Products */,
 				1896BB03E0C15FD173236A21 /* Pods */,
-				E8064C38EE3AEE0436FC71B2 /* Frameworks */,
+				BA810157E869D9AC51650301 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -97,6 +101,7 @@
 		F5E0028523C79321000769F5 /* Qpay */ = {
 			isa = PBXGroup;
 			children = (
+				F5F601532436610F004AE421 /* login.mp4 */,
 				F5A8A19B2433BA0400843C15 /* Utilities.swift */,
 				F5A8A1992433B00D00843C15 /* GoogleService-Info.plist */,
 				F51E24AF24329D4B007C93A6 /* CustomerDataObj.m */,
@@ -108,6 +113,7 @@
 				F5E0028823C79321000769F5 /* FirstViewController.swift */,
 				F5E0028A23C79321000769F5 /* SecondViewController.swift */,
 				F5E0028C23C79322000769F5 /* Main.storyboard */,
+				F5C279DC24343E2A0046A296 /* SignUpViewController.swift */,
 				F5A8A19D2433E12100843C15 /* LoginViewController.swift */,
 				F5E0028F23C79322000769F5 /* Assets.xcassets */,
 				F5E0029123C79323000769F5 /* LaunchScreen.storyboard */,
@@ -125,11 +131,11 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = F5E0029723C79323000769F5 /* Build configuration list for PBXNativeTarget "Qpay" */;
 			buildPhases = (
-				BFB1D3D437F3F0B94E625E6A /* [CP] Check Pods Manifest.lock */,
+				3EA0DC88F0DCADB75878AB99 /* [CP] Check Pods Manifest.lock */,
 				F5E0027F23C79321000769F5 /* Sources */,
 				F5E0028023C79321000769F5 /* Frameworks */,
 				F5E0028123C79321000769F5 /* Resources */,
-				AD5FA1C991E7FB65C8F6CDD2 /* [CP] Embed Pods Frameworks */,
+				DD12E4C81A92AFEA7B4DABA7 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -183,6 +189,7 @@
 				F570731E243158CA00F1F822 /* Plaid.storyboard in Resources */,
 				F5A8A19A2433B00D00843C15 /* GoogleService-Info.plist in Resources */,
 				F5E0029023C79322000769F5 /* Assets.xcassets in Resources */,
+				F5F601542436610F004AE421 /* login.mp4 in Resources */,
 				F5E0028E23C79322000769F5 /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -190,24 +197,7 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		AD5FA1C991E7FB65C8F6CDD2 /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-Qpay/Pods-Qpay-frameworks-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-Qpay/Pods-Qpay-frameworks-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Qpay/Pods-Qpay-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		BFB1D3D437F3F0B94E625E6A /* [CP] Check Pods Manifest.lock */ = {
+		3EA0DC88F0DCADB75878AB99 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -229,6 +219,23 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
+		DD12E4C81A92AFEA7B4DABA7 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Qpay/Pods-Qpay-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Qpay/Pods-Qpay-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Qpay/Pods-Qpay-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -242,6 +249,7 @@
 				F5E0028B23C79322000769F5 /* SecondViewController.swift in Sources */,
 				F5A8A19E2433E12100843C15 /* LoginViewController.swift in Sources */,
 				F5E0028723C79321000769F5 /* AppDelegate.swift in Sources */,
+				F5C279DD24343E2A0046A296 /* SignUpViewController.swift in Sources */,
 				F57073192431521900F1F822 /* ViewController.m in Sources */,
 				F5E0028923C79321000769F5 /* FirstViewController.swift in Sources */,
 			);
@@ -387,7 +395,7 @@
 		};
 		F5E0029823C79323000769F5 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = E1FDC399C90D6986F9A4875C /* Pods-Qpay.debug.xcconfig */;
+			baseConfigurationReference = 75F37D1AFA80062813F01704 /* Pods-Qpay.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
@@ -410,7 +418,7 @@
 		};
 		F5E0029923C79323000769F5 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 5EF3B09ECD4827F9F441FB11 /* Pods-Qpay.release.xcconfig */;
+			baseConfigurationReference = 7ED89826FB8E1BE7D63DF155 /* Pods-Qpay.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
