@@ -18,16 +18,13 @@
 
 #if defined(__APPLE__)
 
-#if TARGET_OS_IOS || TARGET_OS_TV
-#import <UIKit/UIKit.h>
-#endif
-
 #include <SystemConfiguration/SystemConfiguration.h>
 #include <dispatch/dispatch.h>
 #include <netinet/in.h>
 
 #include <memory>
 
+#include "Firestore/core/src/firebase/firestore/util/executor_libdispatch.h"
 #include "Firestore/core/src/firebase/firestore/util/hard_assert.h"
 #include "Firestore/core/src/firebase/firestore/util/log.h"
 #include "absl/memory/memory.h"
@@ -40,6 +37,7 @@ namespace {
 
 using NetworkStatus = ConnectivityMonitor::NetworkStatus;
 using util::AsyncQueue;
+using util::ExecutorLibdispatch;
 
 NetworkStatus ToNetworkStatus(SCNetworkReachabilityFlags flags) {
   if (!(flags & kSCNetworkReachabilityFlagsReachable)) {
@@ -78,16 +76,9 @@ void OnReachabilityChangedCallback(SCNetworkReachabilityRef /*unused*/,
  */
 class ConnectivityMonitorApple : public ConnectivityMonitor {
  public:
-  explicit ConnectivityMonitorApple(
-      const std::shared_ptr<AsyncQueue>& worker_queue)
-      : ConnectivityMonitor{worker_queue} {
-    reachability_ = CreateReachability();
-    if (!reachability_) {
-      LOG_DEBUG("Failed to create reachability monitor.");
-      return;
-    }
-
-    SCNetworkReachabilityFlags flags{};
+  explicit ConnectivityMonitorApple(AsyncQueue* worker_queue)
+      : ConnectivityMonitor{worker_queue}, reachability_{CreateReachability()} {
+    SCNetworkReachabilityFlags flags;
     if (SCNetworkReachabilityGetFlags(reachability_, &flags)) {
       SetInitialStatus(ToNetworkStatus(flags));
     }
@@ -101,75 +92,36 @@ class ConnectivityMonitorApple : public ConnectivityMonitor {
       return;
     }
 
-    // It's okay to use the main queue for reachability events because they are
-    // fairly infrequent, and there's no good way to get the underlying dispatch
-    // queue out of the worker queue. The callback itself is still executed on
-    // the worker queue.
+    // TODO(varconst): 1. Make this at least more robust by adding an enum to
+    // `Executor` that allows asserting on the actual type before casting.
+    // 2. This is an unfortunate, brittle mechanism, see if better alternatives
+    //    come up.
+    // On Apple platforms, the executor implementation must be the
+    // libdispatch-based one.
+    auto executor = static_cast<ExecutorLibdispatch*>(queue()->executor());
     success = SCNetworkReachabilitySetDispatchQueue(reachability_,
-                                                    dispatch_get_main_queue());
+                                                    executor->dispatch_queue());
     if (!success) {
       LOG_DEBUG("Couldn't set reachability queue");
       return;
     }
-
-#if TARGET_OS_IOS || TARGET_OS_TV
-    this->observer_ = [[NSNotificationCenter defaultCenter]
-        addObserverForName:UIApplicationWillEnterForegroundNotification
-                    object:nil
-                     queue:[NSOperationQueue mainQueue]
-                usingBlock:^(NSNotification* note) {
-                  this->OnEnteredForeground();
-                }];
-#endif
   }
 
   ~ConnectivityMonitorApple() {
-#if TARGET_OS_IOS || TARGET_OS_TV
-    [[NSNotificationCenter defaultCenter] removeObserver:this->observer_];
-#endif
-
-    if (reachability_) {
-      bool success =
-          SCNetworkReachabilitySetDispatchQueue(reachability_, nullptr);
-      if (!success) {
-        LOG_DEBUG("Couldn't unset reachability queue");
-      }
-
-      CFRelease(reachability_);
+    bool success =
+        SCNetworkReachabilitySetDispatchQueue(reachability_, nullptr);
+    if (!success) {
+      LOG_DEBUG("Couldn't unset reachability queue");
     }
   }
 
-#if TARGET_OS_IOS || TARGET_OS_TV
-  void OnEnteredForeground() {
-    SCNetworkReachabilityFlags flags{};
-    if (!SCNetworkReachabilityGetFlags(reachability_, &flags)) return;
-
-    queue()->Enqueue([this, flags] {
-      auto status = ToNetworkStatus(flags);
-      if (status != NetworkStatus::Unavailable) {
-        // There may have been network changes while Firestore was in the
-        // background for which we did not get OnReachabilityChangedCallback
-        // notifications. If entering the foreground and we have a connection,
-        // reset the connection to ensure that RPCs don't have to wait for TCP
-        // timeouts.
-        this->InvokeCallbacks(status);
-      } else {
-        this->MaybeInvokeCallbacks(status);
-      }
-    });
-  }
-#endif
-
   void OnReachabilityChanged(SCNetworkReachabilityFlags flags) {
-    queue()->Enqueue(
+    queue()->ExecuteBlocking(
         [this, flags] { MaybeInvokeCallbacks(ToNetworkStatus(flags)); });
   }
 
  private:
-  SCNetworkReachabilityRef reachability_ = nil;
-#if TARGET_OS_IOS || TARGET_OS_TV
-  id<NSObject> observer_ = nil;
-#endif
+  SCNetworkReachabilityRef reachability_;
 };
 
 namespace {
@@ -185,7 +137,7 @@ void OnReachabilityChangedCallback(SCNetworkReachabilityRef /*unused*/,
 }  // namespace
 
 std::unique_ptr<ConnectivityMonitor> ConnectivityMonitor::Create(
-    const std::shared_ptr<AsyncQueue>& worker_queue) {
+    AsyncQueue* worker_queue) {
   return absl::make_unique<ConnectivityMonitorApple>(worker_queue);
 }
 

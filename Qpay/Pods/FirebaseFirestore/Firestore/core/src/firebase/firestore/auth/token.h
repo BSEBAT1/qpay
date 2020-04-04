@@ -20,6 +20,8 @@
 #include <string>
 
 #include "Firestore/core/src/firebase/firestore/auth/user.h"
+#include "Firestore/core/src/firebase/firestore/util/hard_assert.h"
+#include "absl/strings/string_view.h"
 
 namespace firebase {
 namespace firestore {
@@ -43,7 +45,10 @@ class Token {
   Token(std::string token, User user);
 
   /** The actual raw token. */
-  const std::string& token() const;
+  const std::string& token() const {
+    HARD_ASSERT(user_.is_authenticated());
+    return token_;
+  }
 
   /**
    * The user with which the token is associated (used for persisting user

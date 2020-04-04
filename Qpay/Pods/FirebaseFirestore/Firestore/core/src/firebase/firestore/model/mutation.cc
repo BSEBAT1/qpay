@@ -16,70 +16,29 @@
 
 #include "Firestore/core/src/firebase/firestore/model/mutation.h"
 
-#include <cstdlib>
-#include <ostream>
-#include <sstream>
 #include <utility>
 
 #include "Firestore/core/src/firebase/firestore/model/document.h"
 #include "Firestore/core/src/firebase/firestore/model/field_path.h"
-#include "Firestore/core/src/firebase/firestore/model/field_value.h"
-#include "Firestore/core/src/firebase/firestore/model/no_document.h"
 #include "Firestore/core/src/firebase/firestore/util/hard_assert.h"
-#include "Firestore/core/src/firebase/firestore/util/to_string.h"
-#include "absl/strings/str_cat.h"
 
 namespace firebase {
 namespace firestore {
 namespace model {
 
-std::string MutationResult::ToString() const {
-  return absl::StrCat(
-      "MutationResult(version=", version_.ToString(),
-      ", transform_results=", util::ToString(transform_results_), ")");
-}
-
-std::ostream& operator<<(std::ostream& os, const MutationResult& result) {
-  return os << result.ToString();
-}
-
-bool operator==(const MutationResult& lhs, const MutationResult& rhs) {
-  return lhs.version() == rhs.version() &&
-         lhs.transform_results() == rhs.transform_results();
-}
-
-MaybeDocument Mutation::ApplyToRemoteDocument(
-    const absl::optional<MaybeDocument>& maybe_doc,
-    const MutationResult& mutation_result) const {
-  return rep().ApplyToRemoteDocument(maybe_doc, mutation_result);
-}
-
-absl::optional<MaybeDocument> Mutation::ApplyToLocalView(
-    const absl::optional<MaybeDocument>& maybe_doc,
-    const absl::optional<MaybeDocument>& base_doc,
-    const Timestamp& local_write_time) const {
-  return rep().ApplyToLocalView(maybe_doc, base_doc, local_write_time);
-}
-
-Mutation::Rep::Rep(DocumentKey&& key, Precondition&& precondition)
+Mutation::Mutation(DocumentKey&& key, Precondition&& precondition)
     : key_(std::move(key)), precondition_(std::move(precondition)) {
 }
 
-bool Mutation::Rep::Equals(const Mutation::Rep& other) const {
-  return type() == other.type() && key_ == other.key_ &&
-         precondition_ == other.precondition_;
-}
-
-void Mutation::Rep::VerifyKeyMatches(
-    const absl::optional<MaybeDocument>& maybe_doc) const {
+void Mutation::VerifyKeyMatches(const MaybeDocument* maybe_doc) const {
   if (maybe_doc) {
     HARD_ASSERT(maybe_doc->key() == key(),
                 "Can only apply a mutation to a document with the same key");
   }
 }
 
-SnapshotVersion Mutation::Rep::GetPostMutationVersion(
-    const absl::optional<MaybeDocument>& maybe_doc) {
+SnapshotVersion Mutation::GetPostMutationVersion(
+    const MaybeDocument* maybe_doc) {
   if (maybe_doc && maybe_doc->type() == MaybeDocument::Type::Document) {
     return maybe_doc->version();
   } else {
@@ -87,18 +46,78 @@ SnapshotVersion Mutation::Rep::GetPostMutationVersion(
   }
 }
 
-bool operator==(const Mutation& lhs, const Mutation& rhs) {
-  return lhs.rep_ == nullptr
-             ? rhs.rep_ == nullptr
-             : (rhs.rep_ != nullptr && lhs.rep_->Equals(*rhs.rep_));
+SetMutation::SetMutation(DocumentKey&& key,
+                         FieldValue&& value,
+                         Precondition&& precondition)
+    : Mutation(std::move(key), std::move(precondition)),
+      value_(std::move(value)) {
 }
 
-size_t Mutation::Rep::Hash() const {
-  return util::Hash(type(), key(), precondition());
+std::shared_ptr<const MaybeDocument> SetMutation::ApplyToLocalView(
+    const std::shared_ptr<const MaybeDocument>& maybe_doc,
+    const MaybeDocument*,
+    const Timestamp&) const {
+  VerifyKeyMatches(maybe_doc.get());
+
+  if (!precondition().IsValidFor(maybe_doc.get())) {
+    return maybe_doc;
+  }
+
+  SnapshotVersion version = GetPostMutationVersion(maybe_doc.get());
+  return absl::make_unique<Document>(FieldValue(value_), key(), version,
+                                     /*has_local_mutations=*/true);
 }
 
-std::ostream& operator<<(std::ostream& os, const Mutation& mutation) {
-  return os << mutation.ToString();
+PatchMutation::PatchMutation(DocumentKey&& key,
+                             FieldValue&& value,
+                             FieldMask&& mask,
+                             Precondition&& precondition)
+    : Mutation(std::move(key), std::move(precondition)),
+      value_(std::move(value)),
+      mask_(std::move(mask)) {
+}
+
+std::shared_ptr<const MaybeDocument> PatchMutation::ApplyToLocalView(
+    const std::shared_ptr<const MaybeDocument>& maybe_doc,
+    const MaybeDocument*,
+    const Timestamp&) const {
+  VerifyKeyMatches(maybe_doc.get());
+
+  if (!precondition().IsValidFor(maybe_doc.get())) {
+    if (maybe_doc) {
+      return absl::make_unique<MaybeDocument>(maybe_doc->key(),
+                                              maybe_doc->version());
+    }
+    return nullptr;
+  }
+
+  SnapshotVersion version = GetPostMutationVersion(maybe_doc.get());
+  FieldValue new_data = PatchDocument(maybe_doc.get());
+  return absl::make_unique<Document>(std::move(new_data), key(), version,
+                                     /*has_local_mutations=*/true);
+}
+
+FieldValue PatchMutation::PatchDocument(const MaybeDocument* maybe_doc) const {
+  if (maybe_doc && maybe_doc->type() == MaybeDocument::Type::Document) {
+    return PatchObject(static_cast<const Document*>(maybe_doc)->data());
+  } else {
+    return PatchObject(FieldValue::FromMap({}));
+  }
+}
+
+FieldValue PatchMutation::PatchObject(FieldValue obj) const {
+  HARD_ASSERT(obj.type() == FieldValue::Type::Object);
+  for (const FieldPath& path : mask_) {
+    if (!path.empty()) {
+      absl::optional<FieldValue> new_value = value_.Get(path);
+      if (!new_value) {
+        obj = obj.Delete(path);
+      } else {
+        obj = obj.Set(path, *new_value);
+      }
+    }
+  }
+  return obj;
 }
 
 }  // namespace model

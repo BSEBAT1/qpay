@@ -22,9 +22,12 @@
 #import <FirebaseCore/FIRComponentContainer.h>
 #import <FirebaseCore/FIROptionsInternal.h>
 
-#include "Firestore/core/src/firebase/firestore/util/error_apple.h"
 #include "Firestore/core/src/firebase/firestore/util/hard_assert.h"
 #include "Firestore/core/src/firebase/firestore/util/string_apple.h"
+
+// NB: This is also defined in Firestore/Source/Public/FIRFirestoreErrors.h
+// NOLINTNEXTLINE: public constant
+NSString* const FIRFirestoreErrorDomain = @"FIRFirestoreErrorDomain";
 
 namespace firebase {
 namespace firestore {
@@ -80,7 +83,7 @@ void FirebaseCredentialsProvider::GetToken(TokenListener completion) {
   HARD_ASSERT(auth_listener_handle_,
               "GetToken cannot be called after listener removed.");
 
-  // Take note of the current value of the token_counter so that this method can
+  // Take note of the current value of the tokenCounter so that this method can
   // fail if there is a token change while the request is outstanding.
   int initial_token_counter = contents_->token_counter;
 
@@ -97,8 +100,8 @@ void FirebaseCredentialsProvider::GetToken(TokenListener completion) {
       // Cancel the request since the user changed while the request was
       // outstanding so the response is likely for a previous user (which
       // user, we can't be sure).
-      completion(util::Status(Error::Aborted,
-                              "GetToken aborted due to token change."));
+      completion(util::Status(FirestoreErrorCode::Aborted,
+                              "getToken aborted due to token change."));
     } else {
       if (error == nil) {
         if (token != nil) {
@@ -107,9 +110,9 @@ void FirebaseCredentialsProvider::GetToken(TokenListener completion) {
           completion(Token::Unauthenticated());
         }
       } else {
-        Error error_code = Error::Unknown;
+        FirestoreErrorCode error_code = FirestoreErrorCode::Unknown;
         if (error.domain == FIRFirestoreErrorDomain) {
-          error_code = static_cast<Error>(error.code);
+          error_code = static_cast<FirestoreErrorCode>(error.code);
         }
         completion(util::Status(error_code,
                                 util::MakeString(error.localizedDescription)));
@@ -134,19 +137,19 @@ void FirebaseCredentialsProvider::InvalidateToken() {
 }
 
 void FirebaseCredentialsProvider::SetCredentialChangeListener(
-    CredentialChangeListener change_listener) {
+    CredentialChangeListener changeListener) {
   std::unique_lock<std::mutex> lock(contents_->mutex);
-  if (change_listener) {
+  if (changeListener) {
     HARD_ASSERT(!change_listener_, "set change_listener twice!");
     // Fire initial event.
-    change_listener(contents_->current_user);
+    changeListener(contents_->current_user);
   } else {
     HARD_ASSERT(auth_listener_handle_, "removed change_listener twice!");
     HARD_ASSERT(change_listener_, "change_listener removed without being set!");
     [[NSNotificationCenter defaultCenter] removeObserver:auth_listener_handle_];
     auth_listener_handle_ = nil;
   }
-  change_listener_ = change_listener;
+  change_listener_ = changeListener;
 }
 
 }  // namespace auth

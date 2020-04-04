@@ -21,10 +21,8 @@
 
 #include <grpc/support/port_platform.h>
 
-#include "src/core/tsi/grpc_shadow_boringssl.h"
-
 #include <grpc/slice.h>
-#include <openssl_grpc/rsa.h>
+#include <openssl/rsa.h>
 
 #include "src/core/lib/json/json.h"
 

@@ -17,60 +17,29 @@
 #ifndef FIRESTORE_CORE_SRC_FIREBASE_FIRESTORE_REMOTE_WRITE_STREAM_H_
 #define FIRESTORE_CORE_SRC_FIREBASE_FIRESTORE_REMOTE_WRITE_STREAM_H_
 
+#if !defined(__OBJC__)
+#error "This header only supports Objective-C++"
+#endif  // !defined(__OBJC__)
+
+#import <Foundation/Foundation.h>
 #include <memory>
 #include <string>
-#include <vector>
 
-#include "Firestore/core/src/firebase/firestore/model/model_fwd.h"
 #include "Firestore/core/src/firebase/firestore/remote/grpc_connection.h"
 #include "Firestore/core/src/firebase/firestore/remote/remote_objc_bridge.h"
 #include "Firestore/core/src/firebase/firestore/remote/stream.h"
 #include "Firestore/core/src/firebase/firestore/util/async_queue.h"
-#include "Firestore/core/src/firebase/firestore/util/status_fwd.h"
+#include "Firestore/core/src/firebase/firestore/util/status.h"
 #include "absl/strings/string_view.h"
 #include "grpcpp/support/byte_buffer.h"
+
+#import "Firestore/Source/Core/FSTTypes.h"
+#import "Firestore/Source/Model/FSTMutation.h"
+#import "Firestore/Source/Remote/FSTSerializerBeta.h"
 
 namespace firebase {
 namespace firestore {
 namespace remote {
-
-class Serializer;
-
-class WriteStreamCallback {
- public:
-  virtual ~WriteStreamCallback() = default;
-
-  /**
-   * Called by the `WriteStream` when it is ready to accept outbound request
-   * messages.
-   */
-  virtual void OnWriteStreamOpen() = 0;
-
-  /**
-   * Called by the `WriteStream` upon a successful handshake response from the
-   * server, which is the receiver's cue to send any pending writes.
-   */
-  virtual void OnWriteStreamHandshakeComplete() = 0;
-
-  /**
-   * Called by the `WriteStream` upon receiving a StreamingWriteResponse from
-   * the server that contains mutation results.
-   */
-  virtual void OnWriteStreamMutationResult(
-      model::SnapshotVersion commit_version,
-      std::vector<model::MutationResult> results) = 0;
-
-  /**
-   * Called when the `WriteStream`'s underlying RPC is interrupted for whatever
-   * reason, usually because of an error, but possibly due to an idle timeout.
-   * The status passed to this method may be "ok", in which case the stream was
-   * closed without attributable fault.
-   *
-   * NOTE: This will not be called after `Stop` is called on the stream. See
-   * "Starting and Stopping" on `Stream` for details.
-   */
-  virtual void OnWriteStreamClose(const util::Status& status) = 0;
-};
 
 /**
  * A Stream that implements the Write RPC.
@@ -92,13 +61,13 @@ class WriteStreamCallback {
  */
 class WriteStream : public Stream {
  public:
-  WriteStream(const std::shared_ptr<util::AsyncQueue>& async_queue,
-              std::shared_ptr<auth::CredentialsProvider> credentials_provider,
-              Serializer serializer,
+  WriteStream(util::AsyncQueue* async_queue,
+              auth::CredentialsProvider* credentials_provider,
+              FSTSerializerBeta* serializer,
               GrpcConnection* grpc_connection,
-              WriteStreamCallback* callback);
+              id<FSTWriteStreamDelegate> delegate);
 
-  void set_last_stream_token(nanopb::ByteString token);
+  void SetLastStreamToken(NSData* token);
   /**
    * The last received stream token from the server, used to acknowledge which
    * responses the client has processed. Stream tokens are opaque checkpoint
@@ -107,7 +76,7 @@ class WriteStream : public Stream {
    * `WriteStream` manages propagating this value from responses to the
    * next request.
    */
-  const nanopb::ByteString& last_stream_token() const;
+  NSData* GetLastStreamToken() const;
 
   /**
    * Tracks whether or not a handshake has been successfully exchanged and
@@ -124,7 +93,7 @@ class WriteStream : public Stream {
   virtual void WriteHandshake();
 
   /** Sends a group of mutations to the Firestore backend to apply. */
-  virtual void WriteMutations(const std::vector<model::Mutation>& mutations);
+  virtual void WriteMutations(NSArray<FSTMutation*>* mutations);
 
  protected:
   // For tests only
@@ -145,10 +114,9 @@ class WriteStream : public Stream {
     return "WriteStream";
   }
 
-  WriteStreamSerializer write_serializer_;
-  WriteStreamCallback* callback_ = nullptr;
+  bridge::WriteStreamSerializer serializer_bridge_;
+  bridge::WriteStreamDelegate delegate_bridge_;
   bool handshake_complete_ = false;
-  nanopb::ByteString last_stream_token_;
 };
 
 }  // namespace remote

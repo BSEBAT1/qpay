@@ -136,6 +136,7 @@
 				F5E0028023C79321000769F5 /* Frameworks */,
 				F5E0028123C79321000769F5 /* Resources */,
 				DD12E4C81A92AFEA7B4DABA7 /* [CP] Embed Pods Frameworks */,
+				395329261ED702193E2AC275 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -197,6 +198,23 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
+		395329261ED702193E2AC275 /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Qpay/Pods-Qpay-resources-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Copy Pods Resources";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Qpay/Pods-Qpay-resources-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Qpay/Pods-Qpay-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
 		3EA0DC88F0DCADB75878AB99 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;

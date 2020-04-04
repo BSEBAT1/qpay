@@ -23,7 +23,8 @@ namespace auth {
 CredentialsProvider::CredentialsProvider() : change_listener_(nullptr) {
 }
 
-CredentialsProvider::~CredentialsProvider() = default;
+CredentialsProvider::~CredentialsProvider() {
+}
 
 }  // namespace auth
 }  // namespace firestore

@@ -22,8 +22,6 @@
 #include <unordered_map>
 #include <vector>
 
-#include "Firestore/core/src/firebase/firestore/util/warnings.h"
-
 #include "Firestore/core/src/firebase/firestore/auth/token.h"
 #include "Firestore/core/src/firebase/firestore/core/database_info.h"
 #include "Firestore/core/src/firebase/firestore/remote/connectivity_monitor.h"
@@ -37,9 +35,7 @@
 #include "grpcpp/channel.h"
 #include "grpcpp/client_context.h"
 #include "grpcpp/completion_queue.h"
-SUPPRESS_DOCUMENTATION_WARNINGS_BEGIN()
 #include "grpcpp/generic/generic_stub.h"
-SUPPRESS_END()
 
 namespace firebase {
 namespace firestore {
@@ -56,7 +52,7 @@ namespace remote {
 class GrpcConnection {
  public:
   GrpcConnection(const core::DatabaseInfo& database_info,
-                 const std::shared_ptr<util::AsyncQueue>& worker_queue,
+                 util::AsyncQueue* worker_queue,
                  grpc::CompletionQueue* grpc_queue,
                  ConnectivityMonitor* connectivity_monitor);
 
@@ -108,7 +104,7 @@ class GrpcConnection {
   void RegisterConnectivityMonitor();
 
   const core::DatabaseInfo* database_info_ = nullptr;
-  std::shared_ptr<util::AsyncQueue> worker_queue_;
+  util::AsyncQueue* worker_queue_ = nullptr;
   grpc::CompletionQueue* grpc_queue_ = nullptr;
 
   std::shared_ptr<grpc::Channel> grpc_channel_;

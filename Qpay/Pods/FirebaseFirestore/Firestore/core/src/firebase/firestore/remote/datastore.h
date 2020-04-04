@@ -17,6 +17,11 @@
 #ifndef FIRESTORE_CORE_SRC_FIREBASE_FIRESTORE_REMOTE_DATASTORE_H_
 #define FIRESTORE_CORE_SRC_FIREBASE_FIRESTORE_REMOTE_DATASTORE_H_
 
+#if !defined(__OBJC__)
+#error "This header only supports Objective-C++"
+#endif  // !defined(__OBJC__)
+
+#import <Foundation/Foundation.h>
 #include <functional>
 #include <memory>
 #include <string>
@@ -24,7 +29,7 @@
 
 #include "Firestore/core/src/firebase/firestore/auth/credentials_provider.h"
 #include "Firestore/core/src/firebase/firestore/auth/token.h"
-#include "Firestore/core/src/firebase/firestore/core/core_fwd.h"
+#include "Firestore/core/src/firebase/firestore/core/database_info.h"
 #include "Firestore/core/src/firebase/firestore/model/document_key.h"
 #include "Firestore/core/src/firebase/firestore/remote/grpc_call.h"
 #include "Firestore/core/src/firebase/firestore/remote/grpc_connection.h"
@@ -33,10 +38,15 @@
 #include "Firestore/core/src/firebase/firestore/remote/write_stream.h"
 #include "Firestore/core/src/firebase/firestore/util/async_queue.h"
 #include "Firestore/core/src/firebase/firestore/util/executor.h"
-#include "Firestore/core/src/firebase/firestore/util/status_fwd.h"
+#include "Firestore/core/src/firebase/firestore/util/status.h"
+#include "Firestore/core/src/firebase/firestore/util/statusor.h"
 #include "absl/strings/string_view.h"
 #include "grpcpp/completion_queue.h"
 #include "grpcpp/support/status.h"
+
+#import "Firestore/Source/Core/FSTTypes.h"
+#import "Firestore/Source/Remote/FSTSerializerBeta.h"
+#import "Firestore/Source/Remote/FSTStream.h"
 
 namespace firebase {
 namespace firestore {
@@ -54,20 +64,16 @@ namespace remote {
  * `Datastore` is generally not responsible for understanding the higher-level
  * protocol involved in actually making changes or reading data, and aside from
  * the connections it manages is otherwise stateless.
- *
- * This class is only intended to be inherited from by test mocks.
  */
 class Datastore : public std::enable_shared_from_this<Datastore> {
  public:
-  using LookupCallback = std::function<void(
-      const util::StatusOr<std::vector<model::MaybeDocument>>&)>;
-  using CommitCallback = std::function<void(const util::Status&)>;
-
   Datastore(const core::DatabaseInfo& database_info,
-            const std::shared_ptr<util::AsyncQueue>& worker_queue,
-            std::shared_ptr<auth::CredentialsProvider> credentials);
+            util::AsyncQueue* worker_queue,
+            auth::CredentialsProvider* credentials,
+            FSTSerializerBeta* serializer);
 
-  virtual ~Datastore() = default;
+  virtual ~Datastore() {
+  }
 
   /** Starts polling the gRPC completion queue. */
   void Start();
@@ -78,45 +84,19 @@ class Datastore : public std::enable_shared_from_this<Datastore> {
    * Creates a new `WatchStream` that is still unstarted but uses a common
    * shared channel.
    */
-  virtual std::shared_ptr<WatchStream> CreateWatchStream(
-      WatchStreamCallback* callback);
+  std::shared_ptr<WatchStream> CreateWatchStream(
+      id<FSTWatchStreamDelegate> delegate);
   /**
    * Creates a new `WriteStream` that is still unstarted but uses a common
    * shared channel.
    */
-  virtual std::shared_ptr<WriteStream> CreateWriteStream(
-      WriteStreamCallback* callback);
+  std::shared_ptr<WriteStream> CreateWriteStream(
+      id<FSTWriteStreamDelegate> delegate);
 
-  void CommitMutations(const std::vector<model::Mutation>& mutations,
-                       CommitCallback&& callback);
+  void CommitMutations(NSArray<FSTMutation*>* mutations,
+                       FSTVoidErrorBlock completion);
   void LookupDocuments(const std::vector<model::DocumentKey>& keys,
-                       LookupCallback&& callback);
-
-  /** Returns true if the given error is a gRPC ABORTED error. */
-  static bool IsAbortedError(const util::Status& status);
-
-  /**
-   * Determines whether an error code represents a permanent error when received
-   * in response to a non-write operation.
-   *
-   * See `IsPermanentWriteError` for classifying write errors.
-   */
-  static bool IsPermanentError(const util::Status& status);
-
-  /**
-   * Determines whether an error code represents a permanent error when received
-   * in response to a write operation.
-   *
-   * Write operations must be handled specially because as of b/119437764,
-   * ABORTED errors on the write stream should be retried too (even though
-   * ABORTED errors are not generally retryable).
-   *
-   * Note that during the initial handshake on the write stream an ABORTED error
-   * signals that we should discard our stream token (i.e. it is permanent).
-   * This means a handshake error should be classified with `IsPermanentError`,
-   * above.
-   */
-  static bool IsPermanentWriteError(const util::Status& status);
+                       FSTVoidMaybeDocumentArrayErrorBlock completion);
 
   static std::string GetWhitelistedHeadersAsString(
       const GrpcCall::Metadata& headers);
@@ -127,12 +107,6 @@ class Datastore : public std::enable_shared_from_this<Datastore> {
   Datastore& operator=(Datastore&& other) = delete;
 
  protected:
-  /** Test-only constructor */
-  Datastore(const core::DatabaseInfo& database_info,
-            const std::shared_ptr<util::AsyncQueue>& worker_queue,
-            std::shared_ptr<auth::CredentialsProvider> credentials,
-            std::unique_ptr<ConnectivityMonitor> connectivity_monitor);
-
   /** Test-only method */
   grpc::CompletionQueue* grpc_queue() {
     return &grpc_queue_;
@@ -142,26 +116,22 @@ class Datastore : public std::enable_shared_from_this<Datastore> {
     return !active_calls_.empty() ? active_calls_.back().get() : nullptr;
   }
 
-  /** Test-only getter for mocking */
-  GrpcConnection* grpc_connection() {
-    return &grpc_connection_;
-  }
-
  private:
   void PollGrpcQueue();
 
-  void CommitMutationsWithCredentials(
-      const auth::Token& token,
-      const std::vector<model::Mutation>& mutations,
-      CommitCallback&& callback);
+  void CommitMutationsWithCredentials(const auth::Token& token,
+                                      NSArray<FSTMutation*>* mutations,
+                                      FSTVoidErrorBlock completion);
+  void OnCommitMutationsResponse(const util::StatusOr<grpc::ByteBuffer>& result,
+                                 FSTVoidErrorBlock completion);
 
   void LookupDocumentsWithCredentials(
       const auth::Token& token,
       const std::vector<model::DocumentKey>& keys,
-      LookupCallback&& callback);
+      FSTVoidMaybeDocumentArrayErrorBlock completion);
   void OnLookupDocumentsResponse(
       const util::StatusOr<std::vector<grpc::ByteBuffer>>& result,
-      const LookupCallback& callback);
+      FSTVoidMaybeDocumentArrayErrorBlock completion);
 
   using OnCredentials = std::function<void(const util::StatusOr<auth::Token>&)>;
   void ResumeRpcWithCredentials(const OnCredentials& on_token);
@@ -177,19 +147,19 @@ class Datastore : public std::enable_shared_from_this<Datastore> {
   // down.
   bool is_shut_down_ = false;
 
-  std::shared_ptr<util::AsyncQueue> worker_queue_;
-  std::shared_ptr<auth::CredentialsProvider> credentials_;
+  util::AsyncQueue* worker_queue_ = nullptr;
+  auth::CredentialsProvider* credentials_ = nullptr;
 
   // A separate executor dedicated to polling gRPC completion queue (which is
   // shared for all spawned gRPC streams and calls).
   std::unique_ptr<util::Executor> rpc_executor_;
   grpc::CompletionQueue grpc_queue_;
-  // TODO(varconst): move `ConnectivityMonitor` to `FirestoreClient`.
+  // TODO(varconst): move `ConnectivityMonitor` to `FSTFirestoreClient`.
   std::unique_ptr<ConnectivityMonitor> connectivity_monitor_;
   GrpcConnection grpc_connection_;
 
   std::vector<std::unique_ptr<GrpcCall>> active_calls_;
-  DatastoreSerializer datastore_serializer_;
+  bridge::DatastoreSerializer serializer_bridge_;
 };
 
 }  // namespace remote

@@ -1,5 +1,5 @@
 /*
- * Copyright 2015, 2018 Google LLC
+ * Copyright 2015, 2018 Google
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 #ifndef FIRESTORE_CORE_SRC_FIREBASE_FIRESTORE_UTIL_STATUS_H_
 #define FIRESTORE_CORE_SRC_FIREBASE_FIRESTORE_UTIL_STATUS_H_
 
-#if _WIN32
+#if defined(_WIN32)
 #include <windows.h>
 #endif
 
@@ -25,40 +25,30 @@
 #include <iosfwd>
 #include <memory>
 #include <string>
-#include <utility>
 
 #include "Firestore/core/include/firebase/firestore/firestore_errors.h"
-#include "Firestore/core/src/firebase/firestore/util/status_fwd.h"
+#include "Firestore/core/src/firebase/firestore/util/hard_assert.h"
 #include "absl/base/attributes.h"
 #include "absl/strings/string_view.h"
-
-#if __OBJC__
-@class NSError;
-#endif
 
 namespace firebase {
 namespace firestore {
 namespace util {
 
-class PlatformError;
-
 /// Denotes success or failure of a call.
 class ABSL_MUST_USE_RESULT Status {
  public:
   /// Create a success status.
-  Status() = default;
+  Status() {
+  }
 
   /// \brief Create a status with the specified error code and msg as a
   /// human-readable string containing more detailed information.
-  Status(Error code, std::string msg);
+  Status(FirestoreErrorCode code, absl::string_view msg);
 
   /// Copy the specified status.
   Status(const Status& s);
   void operator=(const Status& s);
-
-  /// Move the specified status.
-  Status(Status&& s) noexcept;
-  void operator=(Status&& s) noexcept;
 
   static Status OK() {
     return Status();
@@ -73,22 +63,19 @@ class ABSL_MUST_USE_RESULT Status {
 
 #if defined(__OBJC__)
   static Status FromNSError(NSError* error);
-
-  NSError* ToNSError() const;
 #endif  // defined(__OBJC__)
 
   /// Returns true iff the status indicates success.
   bool ok() const {
-    return state_ == nullptr;
+    return (state_ == nullptr);
   }
 
-  Error code() const {
-    return ok() ? Error::Ok : (IsMovedFrom() ? Error::Internal : state_->code);
+  FirestoreErrorCode code() const {
+    return ok() ? FirestoreErrorCode::Ok : state_->code;
   }
 
   const std::string& error_message() const {
-    return ok() ? empty_string()
-                : (IsMovedFrom() ? moved_from_message() : state_->msg);
+    return ok() ? empty_string() : state_->msg;
   }
 
   bool operator==(const Status& x) const;
@@ -110,12 +97,9 @@ class ABSL_MUST_USE_RESULT Status {
   /// \return *this
   Status& CausedBy(const Status& cause);
 
-  Status& WithPlatformError(std::unique_ptr<PlatformError> error);
-
   /// \brief Return a string representation of this status suitable for
   /// printing. Returns the string `"OK"` for success.
   std::string ToString() const;
-  friend std::ostream& operator<<(std::ostream& out, const Status& status);
 
   // Ignores any errors. This method does nothing except potentially suppress
   // complaints from any tools that are checking that errors are not dropped on
@@ -124,85 +108,19 @@ class ABSL_MUST_USE_RESULT Status {
 
  private:
   static const std::string& empty_string();
-  static const std::string& moved_from_message();
-
   struct State {
-    State() = default;
-    State(const State& other);
-    State(Error code, std::string&& msg);
-
-    struct Deleter {
-      void operator()(const State* ptr) const;
-    };
-    // A `unique_ptr` with a custom deleter. If the pointer's value has been set
-    // to a special value (0x01) to indicate it is moved, invoking the custom
-    // deleter will be a no-op.
-    using StatePtr = std::unique_ptr<State, Deleter>;
-
-    static State* MovedFromIndicator() {
-      return reinterpret_cast<State*>(0x01);
-    }
-
-    template <typename... Args>
-    static StatePtr MakePtr(Args&&... args) {
-      return StatePtr(new State(std::forward<Args>(args)...));
-    }
-
-    Error code;
+    FirestoreErrorCode code;
     std::string msg;
-
-    // An additional platform-specific error representation that was used to
-    // generate this Status. The PlatformError does not meaningfully contribute
-    // to the identity of this Status: it exists to allow tunneling e.g.
-    // NSError* to Status and back to NSError* losslessly.
-    std::unique_ptr<PlatformError> platform_error;
   };
-
-  // Asserts if `state_` is a valid pointer, should be used at all places where
-  // it is used as a pointer, instead of using `state_`.
-  bool IsMovedFrom() const {
-    return state_.get() == State::MovedFromIndicator();
-  }
-
-  // OK status has a `nullptr` `state_`. If this instance is moved, state_ has
-  // the value of `State::MovedFromIndicator()`. Otherwise `state_` points to
-  // a `State` structure containing the error code and message(s).
-  State::StatePtr state_;
-
-  // Tags this instance as `moved-from`.
-  void SetMovedFrom();
+  // OK status has a `NULL` state_.  Otherwise, `state_` points to
+  // a `State` structure containing the error code and message(s)
+  std::unique_ptr<State> state_;
 
   void SlowCopyFrom(const State* src);
 };
 
-class PlatformError {
- public:
-  virtual ~PlatformError() = default;
-
-  virtual std::unique_ptr<PlatformError> Copy() = 0;
-
-  /**
-   * Creates a new PlatformError with the given code and message, whose cause is
-   * this PlatformError.
-   */
-  virtual std::unique_ptr<PlatformError> WrapWith(Error code,
-                                                  std::string message) = 0;
-};
-
 inline Status::Status(const Status& s)
-    : state_{s.state_ == nullptr ? State::StatePtr{}
-                                 : State::MakePtr(*s.state_)} {
-}
-
-inline Status::State::State(const State& s)
-    : code(s.code),
-      msg(s.msg),
-      platform_error((s.platform_error == nullptr) ? nullptr
-                                                   : s.platform_error->Copy()) {
-}
-
-inline Status::State::State(Error code, std::string&& msg)
-    : code(code), msg(std::move(msg)) {
+    : state_((s.state_ == nullptr) ? nullptr : new State(*s.state_)) {
 }
 
 inline void Status::operator=(const Status& s) {
@@ -210,18 +128,6 @@ inline void Status::operator=(const Status& s) {
   // and the common case where both s and *this are ok.
   if (state_ != s.state_) {
     SlowCopyFrom(s.state_.get());
-  }
-}
-
-inline Status::Status(Status&& s) noexcept : state_(std::move(s.state_)) {
-  s.SetMovedFrom();
-}
-
-inline void Status::operator=(Status&& s) noexcept {
-  // Moving into self is a no-op.
-  if (this != &s) {
-    state_ = std::move(s.state_);
-    s.SetMovedFrom();
   }
 }
 
@@ -233,7 +139,13 @@ inline bool Status::operator!=(const Status& x) const {
   return !(*this == x);
 }
 
-typedef std::function<void(Status)> StatusCallback;
+typedef std::function<void(const Status&)> StatusCallback;
+
+extern std::string StatusCheckOpHelperOutOfLine(const Status& v,
+                                                const char* msg);
+
+#define STATUS_CHECK_OK(val) \
+  HARD_ASSERT(val.ok(), "%s", StatusCheckOpHelperOutOfLine(val, #val))
 
 }  // namespace util
 }  // namespace firestore

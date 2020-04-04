@@ -21,123 +21,121 @@
 #include <pb_encode.h>
 
 #include <cstdint>
+#include <functional>
 #include <string>
 #include <vector>
 
-#include "Firestore/core/src/firebase/firestore/nanopb/byte_string.h"
-#include "grpcpp/support/byte_buffer.h"
+#include "Firestore/core/src/firebase/firestore/nanopb/tag.h"
 
 namespace firebase {
 namespace firestore {
 namespace nanopb {
 
 /**
- * Docs TODO(rsgowman). But currently, this just wraps the underlying Nanopb
- * `pb_ostream_t`. All errors are considered fatal.
+ * Docs TODO(rsgowman). But currently, this just wraps the underlying nanopb
+ * pb_ostream_t. All errors are considered fatal.
  */
 class Writer {
  public:
   /**
-   * Writes a Nanopb proto to the output stream.
+   * Creates an output stream that writes to the specified vector. Note that
+   * this vector pointer must remain valid for the lifetime of this Writer.
    *
-   * This essentially wraps calls to Nanopb's `pb_encode()` method.
+   * (This is roughly equivalent to the nanopb function
+   * pb_ostream_from_buffer())
+   *
+   * @param out_bytes where the output should be serialized to.
    */
-  void Write(const pb_field_t* fields, const void* src_struct);
-
- protected:
-  /**
-   * Creates a `Writer` with a value-initialized `pb_ostream_t`.
-   */
-  Writer() = default;
-
-  pb_ostream_t stream_{};
-};
-
-/**
- * A `Writer` that writes into a vector of bytes.
- *
- * This is roughly equivalent to the Nanopb function `pb_ostream_from_buffer()`,
- * except that `ByteStringWriter` manages the buffer.
- */
-class ByteStringWriter : public Writer {
- public:
-  ByteStringWriter();
-  ~ByteStringWriter();
-
-  ByteStringWriter(const ByteStringWriter&) = delete;
-  ByteStringWriter& operator=(const ByteStringWriter&) = delete;
+  static Writer Wrap(std::vector<std::uint8_t>* out_bytes);
 
   /**
-   * Appends the given data to the internal buffer, growing the capacity of the
-   * buffer to fit.
+   * Creates an output stream that writes to the specified string. Note that
+   * this string pointer must remain valid for the lifetime of this Writer.
+   *
+   * (This is roughly equivalent to the nanopb function
+   * pb_ostream_from_buffer())
+   *
+   * @param out_string where the output should be serialized to.
    */
-  void Append(const void* data, size_t size);
+  static Writer Wrap(std::string* out_string);
 
   /**
-   * Reserves the given number of bytes of total capacity. To reserve `n` more
-   * bytes in a writer `w`, call `w.Reserve(w.size() + n)`.
+   * Creates a non-writing output stream used to calculate the size of
+   * the serialized output.
    */
-  void Reserve(size_t capacity);
-
-  /**
-   * Sets the size of the buffer to some value less than the current capacity,
-   * presumably after writing into the buffer with `pos()`.
-   */
-  void SetSize(size_t size);
-
-  /**
-   * Returns a `ByteString` that takes ownership of the bytes backing this
-   * writer.
-   */
-  ByteString Release();
-
-  size_t size() const {
-    return buffer_ ? buffer_->size : 0;
-  }
-
-  size_t capacity() const {
-    return capacity_;
+  static Writer Sizing() {
+    return Writer(PB_OSTREAM_SIZING);
   }
 
   /**
-   * Returns the number of remaining bytes: the difference between capacity and
-   * size.
+   * Writes a message type to the output stream.
+   *
+   * This essentially wraps calls to nanopb's pb_encode_tag() method.
    */
-  size_t remaining() const {
-    return capacity_ - size();
-  }
+  void WriteTag(Tag tag);
 
   /**
-   * Returns the current writing position within this writer's internal buffer.
-   * This can only be used after calling `Reserve()`.
+   * Writes a nanopb message to the output stream.
+   *
+   * This essentially wraps calls to nanopb's `pb_encode()` method. If we didn't
+   * use `oneof`s in our protos, this would be the primary way of encoding
+   * messages.
    */
-  uint8_t* pos() {
-    return buffer_->bytes + buffer_->size;
+  void WriteNanopbMessage(const pb_field_t fields[], const void* src_struct);
+
+  void WriteSize(size_t size);
+  void WriteNull();
+  void WriteBool(bool bool_value);
+  void WriteInteger(std::int64_t integer_value);
+
+  void WriteString(const std::string& string_value);
+  void WriteBytes(const std::vector<uint8_t>& bytes);
+
+  /**
+   * Writes a message and its length.
+   *
+   * When writing a top level message, protobuf doesn't include the length
+   * (since you can get that already from the length of the binary output.) But
+   * when writing a sub/nested message, you must include the length in the
+   * serialization.
+   *
+   * Call this method when writing a nested message. Provide a function to
+   * write the message itself. This method will calculate the size of the
+   * written message (using the provided function with a non-writing sizing
+   * stream), write out the size (and perform sanity checks), and then serialize
+   * the message by calling the provided function a second time.
+   */
+  void WriteNestedMessage(const std::function<void(Writer*)>& write_message_fn);
+
+  size_t bytes_written() const {
+    return stream_.bytes_written;
   }
 
  private:
-  pb_bytes_array_t* buffer_ = nullptr;
-  size_t capacity_ = 0;
-};
-
-/**
- * A `Writer` that writes into a `std::string`.
- *
- * This is roughly equivalent to the Nanopb function `pb_ostream_from_buffer()`,
- * except that `StringWriter` manages the string.
- */
-class StringWriter : public Writer {
- public:
-  StringWriter();
+  /**
+   * Creates a new Writer, based on the given nanopb pb_ostream_t. Note that
+   * a shallow copy will be taken. (Non-null pointers within this struct must
+   * remain valid for the lifetime of this Writer.)
+   */
+  explicit Writer(const pb_ostream_t& stream) : stream_(stream) {
+  }
 
   /**
-   * Returns the string backing this `StringWriter`, taking ownership of its
-   * contents.
+   * Writes a "varint" to the output stream.
+   *
+   * This essentially wraps calls to nanopb's pb_encode_varint() method.
+   *
+   * Note that (despite the value parameter type) this works for bool, enum,
+   * int32, int64, uint32 and uint64 proto field types.
+   *
+   * Note: This is not expected to be called directly, but rather only
+   * via the other Write* methods (i.e. WriteBool, WriteLong, etc)
+   *
+   * @param value The value to write, represented as a uint64_t.
    */
-  std::string Release();
+  void WriteVarint(std::uint64_t value);
 
- private:
-  std::string buffer_;
+  pb_ostream_t stream_;
 };
 
 }  // namespace nanopb

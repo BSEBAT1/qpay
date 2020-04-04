@@ -18,30 +18,22 @@
 #define FIRESTORE_CORE_SRC_FIREBASE_FIRESTORE_CORE_USER_DATA_H_
 
 #include <memory>
-#include <set>
 #include <string>
 #include <utility>
 #include <vector>
 
+#include "Firestore/core/src/firebase/firestore/model/document_key.h"
 #include "Firestore/core/src/firebase/firestore/model/field_mask.h"
 #include "Firestore/core/src/firebase/firestore/model/field_path.h"
 #include "Firestore/core/src/firebase/firestore/model/field_transform.h"
-#include "Firestore/core/src/firebase/firestore/model/field_value.h"
+#include "Firestore/core/src/firebase/firestore/model/precondition.h"
+
+@class FSTMutation;
+@class FSTObjectValue;
 
 namespace firebase {
 namespace firestore {
-namespace model {
-
-class Precondition;
-class Mutation;
-
-}  // namespace model
-
 namespace core {
-
-class ParseContext;
-class ParsedSetData;
-class ParsedUpdateData;
 
 /**
  * Represents what type of API method provided the data being parsed; useful for
@@ -61,12 +53,11 @@ enum class UserDataSource {
    * false.
    */
   Argument,
-  /**
-   * Indicates that the source is an Argument that may directly contain nested
-   * arrays (e.g. the operand of a `in` query).
-   */
-  ArrayArgument
 };
+
+class ParseContext;
+class ParsedSetData;
+class ParsedUpdateData;
 
 /**
  * Accumulates the side-effect results of parsing user input. These include:
@@ -120,8 +111,9 @@ class ParseAccumulator {
   /**
    * Adds a transformation for the given field path.
    */
-  void AddToFieldTransforms(model::FieldPath field_path,
-                            model::TransformOperation transform_operation);
+  void AddToFieldTransforms(
+      model::FieldPath field_path,
+      std::unique_ptr<model::TransformOperation> transform_operation);
 
   /**
    * Wraps the given `data` along with any accumulated field mask and transforms
@@ -130,7 +122,7 @@ class ParseAccumulator {
    * @return ParsedSetData that has consumed the contents of this
    * ParseAccumulator.
    */
-  ParsedSetData MergeData(model::ObjectValue data) &&;
+  ParsedSetData MergeData(FSTObjectValue* data) &&;
 
   /**
    * Wraps the given `data` and `user_field_mask` along with any accumulated
@@ -145,7 +137,7 @@ class ParseAccumulator {
    * ParseAccumulator. The field mask in the result will be the user_field_mask
    * and only transforms that are covered by the mask will be included.
    */
-  ParsedSetData MergeData(model::ObjectValue data,
+  ParsedSetData MergeData(FSTObjectValue* data,
                           model::FieldMask user_field_mask) &&;
 
   /**
@@ -155,7 +147,7 @@ class ParseAccumulator {
    * @return ParsedSetData that has consumed the contents of this
    * ParseAccumulator.
    */
-  ParsedSetData SetData(model::ObjectValue data) &&;
+  ParsedSetData SetData(FSTObjectValue* data) &&;
 
   /**
    * Wraps the given `data` along with any accumulated field mask and transforms
@@ -164,7 +156,7 @@ class ParseAccumulator {
    * @return ParsedSetData that has consumed the contents of this
    * ParseAccumulator.
    */
-  ParsedUpdateData UpdateData(model::ObjectValue data) &&;
+  ParsedUpdateData UpdateData(FSTObjectValue* data) &&;
 
  private:
   friend class ParseContext;
@@ -174,7 +166,7 @@ class ParseAccumulator {
   // field_mask_ and field_transforms_ are shared across all active context
   // objects to accumulate the result. All ChildContext objects append their
   // results here.
-  std::set<model::FieldPath> field_mask_;
+  std::vector<model::FieldPath> field_mask_;
   std::vector<model::FieldTransform> field_transforms_;
 };
 
@@ -187,7 +179,7 @@ class ParseAccumulator {
 class ParseContext {
  public:
   /**
-   * Initializes a ParseContext with the given source and path.
+   * Initializes a FSTParseContext with the given source and path.
    *
    * @param path A path within the object being parsed. This could be an empty
    * path (in which case the context represents the root of the data being
@@ -232,15 +224,16 @@ class ParseContext {
 
   std::string FieldDescription() const;
 
-  // Helpers to get a ParseContext for a child field.
+  // Helpers to get a FSTParseContext for a child field.
   ParseContext ChildContext(const std::string& field_name);
   ParseContext ChildContext(const model::FieldPath& field_path);
   ParseContext ChildContext(size_t array_index);
 
   void AddToFieldMask(model::FieldPath field_path);
 
-  void AddToFieldTransforms(model::FieldPath field_path,
-                            model::TransformOperation transform_operation);
+  void AddToFieldTransforms(
+      model::FieldPath field_path,
+      std::unique_ptr<model::TransformOperation> transform_operation);
 
  private:
   void ValidatePath() const;
@@ -259,9 +252,9 @@ class ParseContext {
 /** The result of parsing document data (e.g. for a SetData call). */
 class ParsedSetData {
  public:
-  ParsedSetData(model::ObjectValue data,
+  ParsedSetData(FSTObjectValue* data,
                 std::vector<model::FieldTransform> field_transforms);
-  ParsedSetData(model::ObjectValue data,
+  ParsedSetData(FSTObjectValue* data,
                 model::FieldMask field_mask,
                 std::vector<model::FieldTransform> field_transforms);
 
@@ -272,12 +265,12 @@ class ParsedSetData {
    *
    * This method consumes the values stored in the ParsedSetData
    */
-  std::vector<model::Mutation> ToMutations(
+  NSArray<FSTMutation*>* ToMutations(
       const model::DocumentKey& key,
       const model::Precondition& precondition) &&;
 
  private:
-  model::ObjectValue data_;
+  FSTObjectValue* data_;
   model::FieldMask field_mask_;
   std::vector<model::FieldTransform> field_transforms_;
   bool patch_;
@@ -286,11 +279,11 @@ class ParsedSetData {
 /** The result of parsing "update" data (i.e. for an UpdateData call). */
 class ParsedUpdateData {
  public:
-  ParsedUpdateData(model::ObjectValue data,
+  ParsedUpdateData(FSTObjectValue* data,
                    model::FieldMask field_mask,
-                   std::vector<model::FieldTransform> field_transforms);
+                   std::vector<model::FieldTransform> fieldTransforms);
 
-  const model::ObjectValue& data() const {
+  FSTObjectValue* data() const {
     return data_;
   }
 
@@ -305,12 +298,12 @@ class ParsedUpdateData {
    *
    * This method consumes the values stored in the ParsedUpdateData
    */
-  std::vector<model::Mutation> ToMutations(
+  NSArray<FSTMutation*>* ToMutations(
       const model::DocumentKey& key,
       const model::Precondition& precondition) &&;
 
  private:
-  model::ObjectValue data_;
+  FSTObjectValue* data_;
   model::FieldMask field_mask_;
   std::vector<model::FieldTransform> field_transforms_;
 };

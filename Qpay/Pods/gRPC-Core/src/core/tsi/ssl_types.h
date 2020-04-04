@@ -29,9 +29,7 @@
 
 #include <grpc/support/port_platform.h>
 
-#include "src/core/tsi/grpc_shadow_boringssl.h"
-
-#include <openssl_grpc/ssl.h>
+#include <openssl/ssl.h>
 
 #ifdef OPENSSL_IS_BORINGSSL
 #define TSI_INT_AS_SIZE(x) ((size_t)(x))

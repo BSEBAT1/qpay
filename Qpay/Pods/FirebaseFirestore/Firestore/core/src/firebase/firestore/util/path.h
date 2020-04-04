@@ -72,7 +72,8 @@ class Path {
   }
 #endif
 
-  Path() = default;
+  Path() {
+  }
 
   const string_type& native_value() const {
     return pathname_;
@@ -80,10 +81,6 @@ class Path {
 
   const char_type* c_str() const {
     return pathname_.c_str();
-  }
-
-  bool empty() const {
-    return pathname_.empty();
   }
 
   size_t size() const {
@@ -98,7 +95,7 @@ class Path {
 
 #if defined(__OBJC__)
   NSString* ToNSString() const {
-    return MakeNSString(native_value());
+    return WrapNSString(native_value());
   }
 #endif
 
@@ -125,14 +122,6 @@ class Path {
    * Returns true if this Path is an absolute path.
    */
   bool IsAbsolute() const;
-
-  /**
-   * Returns true if this pathname's last component has the given file
-   * extension.
-   *
-   * @param ext The file extension (including leading dot).
-   */
-  bool HasExtension(const Path& ext) const;
 
   /**
    * Returns a new Path with the given UTF-8 encoded path segment appended,

@@ -19,8 +19,7 @@
 NS_ASSUME_NONNULL_BEGIN
 
 /** Used to set on-disk cache size to unlimited. Garbage collection will not run. */
-FOUNDATION_EXTERN const int64_t kFIRFirestoreCacheSizeUnlimited
-    NS_SWIFT_NAME(FirestoreCacheSizeUnlimited);
+extern const int64_t kFIRFirestoreCacheSizeUnlimited NS_SWIFT_NAME(FirestoreCacheSizeUnlimited);
 
 /** Settings used to configure a `FIRFirestore` instance. */
 NS_SWIFT_NAME(FirestoreSettings)
@@ -49,24 +48,21 @@ NS_SWIFT_NAME(FirestoreSettings)
 @property(nonatomic, getter=isPersistenceEnabled) BOOL persistenceEnabled;
 
 /**
- * Specifies whether to use FIRTimestamps for timestamp fields in FIRDocumentSnapshots. This is
- * now enabled by default and should not be disabled.
+ * Enables the use of FIRTimestamps for timestamp fields in FIRDocumentSnapshots.
  *
- * Previously, Firestore returned timestamp fields as NSDate but NSDate is implemented as a double
- * which loses precision and causes unexpected behavior when using a timestamp from a snapshot as a
- * part of a subsequent query.
+ * Currently, Firestore returns timestamp fields as an NSDate but NSDate is implemented as a double
+ * which loses precision and causes unexpected behavior when using a timestamp from a snapshot as
+ * a part of a subsequent query.
  *
- * So now Firestore returns FIRTimestamp values instead of NSDate, avoiding this kind of problem.
+ * Setting timestampsInSnapshotsEnabled to true will cause Firestore to return FIRTimestamp values
+ * instead of NSDate, avoiding this kind of problem. To make this work you must also change any code
+ * that uses NSDate to use FIRTimestamp instead.
  *
- * To opt into the old behavior of returning NSDate objects, you can temporarily set
- * areTimestampsInSnapshotsEnabled to false.
- *
- * @deprecated This setting now defaults to true and will be removed in a future release. If you are
- * already setting it to true, just remove the setting. If you are setting it to false, you should
- * update your code to expect FIRTimestamp objects instead of NSDate and then remove the setting.
+ * NOTE: in the future timestampsInSnapshotsEnabled = true will become the default and this option
+ * will be removed so you should change your code to use FIRTimestamp now and opt-in to this new
+ * behavior as soon as you can.
  */
-@property(nonatomic, getter=areTimestampsInSnapshotsEnabled) BOOL timestampsInSnapshotsEnabled
-    __attribute__((deprecated));
+@property(nonatomic, getter=areTimestampsInSnapshotsEnabled) BOOL timestampsInSnapshotsEnabled;
 
 /**
  * Sets the cache size threshold above which the SDK will attempt to collect least-recently-used
