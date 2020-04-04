@@ -39,6 +39,14 @@ class LoginViewController: UIViewController {
 //       NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide(sender:)), name: UIResponder.keyboardWillHideNotification, object: nil);
         self.hideKeyboardWhenTappedAround()
     }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        if userDefaults.bool(forKey: "isSignedIn"){
+            performSegue(withIdentifier: "showTabs", sender: nil)
+        }
+    }
+    
+    
    
     
     override func viewDidAppear(_ animated: Bool) {
@@ -98,7 +106,7 @@ class LoginViewController: UIViewController {
            view.layer.insertSublayer(videoPlayerLayer!, at: 0)
            
            // Add it to the view and play it
-           videoPlayer?.playImmediately(atRate: 0.3)
+           videoPlayer?.playImmediately(atRate:1)
        }
     
     @IBAction func fbLoginPressed(_ sender: Any) {
