@@ -127,8 +127,8 @@ class FirstViewController: UIViewController {
 extension FirstViewController : CLLocationManagerDelegate {
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         if locations.count > 0 {
-            self.customerMap.setRegion(MKCoordinateRegion(center: locations[0]
-                       .coordinate, span: MKCoordinateSpan(latitudeDelta: 0.1, longitudeDelta: 0.1)), animated: true)
+//            self.customerMap.setRegion(MKCoordinateRegion(center: locations[0]
+//                       .coordinate, span: MKCoordinateSpan(latitudeDelta: 0.1, longitudeDelta: 0.1)), animated: true)
         }
     }
 }
