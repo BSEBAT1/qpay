@@ -20,6 +20,11 @@ class FirstViewController: UIViewController {
     var sfQuery: GFSQuery!
     @IBOutlet var customerMap: MKMapView!
     let locationManager = CLLocationManager()
+    @IBOutlet var locationName: UILabel!
+    @IBOutlet var distance: UILabel!
+    @IBOutlet var buyGasButton: UIButton!
+    @IBOutlet var getDirectionButton: UIButton!
+    var loadedOnce = false
     
     /** @var handle
         @brief The handler for the auth state listener, to allow cancelling later.
@@ -28,10 +33,10 @@ class FirstViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        locations()
         self.locationManager.requestWhenInUseAuthorization()
         setupMap()
     }
+    
     
     func setupMap() {
         if CLLocationManager.locationServicesEnabled() {
@@ -76,19 +81,8 @@ class FirstViewController: UIViewController {
                }
     }
     
-    func locations() {
-    geoFireStoreRef = Firestore.firestore().collection("locations")
-    geoFirestore = GeoFirestore(collectionRef: geoFireStoreRef)
-                let center = CLLocation(latitude: 40.7009, longitude: 73.7129)
-              
-               sfQuery = geoFirestore.query(withCenter: center, radius: 500.6)
-                let ans  = sfQuery.observe(.documentEntered, with: { (key, location) in
-                    print("The document with documentID '\(key)' entered the search area and is at location '\(location)'")
-                    
-                })
-    }
-    
     override func viewDidAppear(_ animated: Bool) {
+        
         if !plaidPresented {
             let plaid = UIStoryboard(name: "Plaid", bundle: nil)
                           if let plaidView = plaid.instantiateViewController(withIdentifier: "plaid") as? ViewController {
@@ -121,18 +115,73 @@ class FirstViewController: UIViewController {
 
                    present(alertController, animated: true, completion: nil)
     }
+    @IBAction func buyGasPressed(_ sender: Any) {
+    }
+    @IBAction func GetDirectionPressed(_ sender: Any) {
+    }
+    
 }
 
 
 extension FirstViewController : CLLocationManagerDelegate {
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        if locations.count > 0 {
-//            self.customerMap.setRegion(MKCoordinateRegion(center: locations[0]
-//                       .coordinate, span: MKCoordinateSpan(latitudeDelta: 0.1, longitudeDelta: 0.1)), animated: true)
+        if locations.count > 0,!loadedOnce {
+           loadGasStations(locations[0])
+            print(locations[0].coordinate)
+            loadedOnce = true
+        }
+    }
+    func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
+        if status == .authorizedWhenInUse || status == .authorizedAlways {
+            loadedOnce = false
+            setupMap()
         }
     }
 }
 extension FirstViewController: MKMapViewDelegate {
+    
+    func loadGasStations(_ center: CLLocation) {
+       geoFireStoreRef = Firestore.firestore().collection("locations")
+       geoFirestore = GeoFirestore(collectionRef: geoFireStoreRef)
+                  sfQuery = geoFirestore.query(withCenter: center, radius: 500.6)
+           _  = sfQuery.observe(.documentEntered, with: { (key, location) in
+            if let location = location {
+                let annotation = MKPointAnnotation()
+                annotation.coordinate = location.coordinate
+                self.customerMap.addAnnotation(annotation)
+            }
+            
+                   })
+       }
+    
+    func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
+        // Don't want to show a custom image if the annotation is the user's location.
+//        guard !(annotation is MKUserLocation) else {
+//            return nil
+//        }
+
+        // Better to make this class property
+        let annotationIdentifier = "AnnotationIdentifier"
+
+        var annotationView: MKAnnotationView?
+        if let dequeuedAnnotationView = mapView.dequeueReusableAnnotationView(withIdentifier: annotationIdentifier) {
+            annotationView = dequeuedAnnotationView
+            annotationView?.annotation = annotation
+        }
+        else {
+            let av = MKAnnotationView(annotation: annotation, reuseIdentifier: annotationIdentifier)
+            av.rightCalloutAccessoryView = UIButton(type: .detailDisclosure)
+            annotationView = av
+        }
+
+        if let annotationView = annotationView {
+            // Configure your annotation view here
+            annotationView.canShowCallout = false
+            annotationView.image = UIImage(named: "Button")
+        }
+
+        return annotationView
+    }
     
 }
 
