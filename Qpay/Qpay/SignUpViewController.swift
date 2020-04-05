@@ -25,6 +25,8 @@ class SignUpViewController: UIViewController {
         Utilities.styleTextField(passWordTextField)
         Utilities.styleFilledButton(SignUpButton)
         view.backgroundColor = UIColor(red:0.14, green:0.58, blue:0.97, alpha:1.00)
+        passWordTextField.textColor = UIColor.white
+        userNameTextField.textColor = UIColor.white
     }
     
 

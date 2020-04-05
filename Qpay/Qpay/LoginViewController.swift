@@ -35,9 +35,9 @@ class LoginViewController: UIViewController {
         Utilities.styleTextField(emailTextField)
         Utilities.styleTextField(passWordTextfield)
        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow(sender:)), name: UIResponder.keyboardWillShowNotification, object: nil);
-
-//       NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide(sender:)), name: UIResponder.keyboardWillHideNotification, object: nil);
         self.hideKeyboardWhenTappedAround()
+        emailTextField.textColor = UIColor.white
+        passWordTextfield.textColor = UIColor.white
     }
     
     override func viewWillAppear(_ animated: Bool) {

@@ -25,6 +25,7 @@ class FirstViewController: UIViewController {
     @IBOutlet var buyGasButton: UIButton!
     @IBOutlet var getDirectionButton: UIButton!
     var loadedOnce = false
+    var currentSelected:MKAnnotation?
     
     /** @var handle
         @brief The handler for the auth state listener, to allow cancelling later.
@@ -35,6 +36,8 @@ class FirstViewController: UIViewController {
         super.viewDidLoad()
         self.locationManager.requestWhenInUseAuthorization()
         setupMap()
+        Utilities.styleFilledButton(buyGasButton)
+        Utilities.styleFilledButton(getDirectionButton)
     }
     
     
@@ -118,8 +121,16 @@ class FirstViewController: UIViewController {
     @IBAction func buyGasPressed(_ sender: Any) {
     }
     @IBAction func GetDirectionPressed(_ sender: Any) {
+        
+        guard let selected = currentSelected else {
+            return
+        }
+         let options = [MKLaunchOptionsDirectionsModeKey: MKLaunchOptionsDirectionsModeDriving]
+        let placemark = MKPlacemark(coordinate: selected.coordinate, addressDictionary: nil)
+         let mapItem = MKMapItem(placemark: placemark)
+        mapItem.name = selected.title ?? "Gas Station" // Provide the name of the destination in the To: field
+        mapItem.openInMaps(launchOptions: options)
     }
-    
 }
 
 
@@ -144,10 +155,12 @@ extension FirstViewController: MKMapViewDelegate {
        geoFireStoreRef = Firestore.firestore().collection("locations")
        geoFirestore = GeoFirestore(collectionRef: geoFireStoreRef)
                   sfQuery = geoFirestore.query(withCenter: center, radius: 500.6)
+        
            _  = sfQuery.observe(.documentEntered, with: { (key, location) in
-            if let location = location {
+            if let location = location, let title = key {
                 let annotation = MKPointAnnotation()
                 annotation.coordinate = location.coordinate
+                annotation.title = title
                 self.customerMap.addAnnotation(annotation)
             }
             
@@ -155,10 +168,10 @@ extension FirstViewController: MKMapViewDelegate {
        }
     
     func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
-        // Don't want to show a custom image if the annotation is the user's location.
-//        guard !(annotation is MKUserLocation) else {
-//            return nil
-//        }
+    
+        guard !(annotation is MKUserLocation) else {
+            return nil
+        }
 
         // Better to make this class property
         let annotationIdentifier = "AnnotationIdentifier"
@@ -176,11 +189,31 @@ extension FirstViewController: MKMapViewDelegate {
 
         if let annotationView = annotationView {
             // Configure your annotation view here
-            annotationView.canShowCallout = false
+            annotationView.canShowCallout = true
+            
             annotationView.image = UIImage(named: "Button")
         }
 
         return annotationView
+    }
+    
+    func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
+        DispatchQueue.main.async {
+            if let anno = view.annotation, let text = anno.title {
+                self.locationName.text = text
+                self.currentSelected = view.annotation
+                guard let userLocation = self.locationManager.location?.coordinate else {
+                    return
+                }
+                let loc1 = CLLocation.init(latitude:userLocation.latitude , longitude: userLocation.longitude)
+                let loc2 = CLLocation.init(latitude: anno.coordinate.latitude, longitude: anno.coordinate.longitude
+                )
+                let distance = loc2.distance(from: loc1)
+                let miles = distance * 0.00062137
+                let doubleStr = String(format: "%.2f", miles)
+                self.distance.text = "\(doubleStr) miles away"
+            }
+        }
     }
     
 }
