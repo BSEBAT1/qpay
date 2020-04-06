@@ -64,6 +64,7 @@ extension CustomerTableViewController: UITableViewDelegate,UITableViewDataSource
                 // Convert HTTP Response Data to a String
                 if let data = data, let dataString = String(data: data, encoding: .utf8) {
                     print("Response data string:\n \(dataString)")
+                    UserDefaults
                 }
         }
         task.resume()

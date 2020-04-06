@@ -154,7 +154,7 @@ extension FirstViewController: MKMapViewDelegate {
     func loadGasStations(_ center: CLLocation) {
        geoFireStoreRef = Firestore.firestore().collection("locations")
        geoFirestore = GeoFirestore(collectionRef: geoFireStoreRef)
-                  sfQuery = geoFirestore.query(withCenter: center, radius: 500.6)
+                  sfQuery = geoFirestore.query(withCenter: center, radius: 80.0)
         
            _  = sfQuery.observe(.documentEntered, with: { (key, location) in
             if let location = location, let title = key {
@@ -162,6 +162,7 @@ extension FirstViewController: MKMapViewDelegate {
                 annotation.coordinate = location.coordinate
                 annotation.title = title
                 self.customerMap.addAnnotation(annotation)
+                
             }
             
                    })
