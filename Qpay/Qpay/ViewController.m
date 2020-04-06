@@ -41,18 +41,21 @@ static const NSString * urlDef = @"http://ebfd01e7.ngrok.io";
     [super viewDidLoad];
     self.button.enabled = NO;
 
-    NSBundle* linkKitBundle = [NSBundle bundleForClass:[PLKPlaidLinkViewController class]];
-    NSString* linkName      = [linkKitBundle objectForInfoDictionaryKey:(NSString*)kCFBundleNameKey];
-    self.label.text         = [NSString stringWithFormat:@"Objective-C — %@ %s+%.0f"
-                                 , linkName, LinkKitVersionString, LinkKitVersionNumber];
+//    NSBundle* linkKitBundle = [NSBundle bundleForClass:[PLKPlaidLinkViewController class]];
+//    NSString* linkName      = [linkKitBundle objectForInfoDictionaryKey:(NSString*)kCFBundleNameKey];
+//    self.label.text         = [NSString stringWithFormat:@"Objective-C — %@ %s+%.0f"
+//                                 , linkName, LinkKitVersionString, LinkKitVersionNumber];
+    self.label.text = @"Secure Connection Link System";
 
     UIColor* shadowColor = [UIColor colorWithRed:3/255.0 green:49/255.0 blue:86/255.0 alpha:0.1];
     self.buttonContainerView.layer.shadowColor   = [shadowColor CGColor];
     self.buttonContainerView.layer.shadowOffset  = CGSizeMake(0, -1);
     self.buttonContainerView.layer.shadowRadius  = 2;
     self.buttonContainerView.layer.shadowOpacity = 1;
-     self.button.enabled = YES;
-
+    self.button.enabled = YES;
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 2 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
+        [self->_button sendActionsForControlEvents:UIControlEventTouchUpInside];
+    });
 }
 
 - (void)didReceiveNotification:(NSNotification*)notification {
@@ -60,16 +63,13 @@ static const NSString * urlDef = @"http://ebfd01e7.ngrok.io";
         [[NSNotificationCenter defaultCenter] removeObserver:self
                                                         name:notification.name
                                                       object:self];
-        self.button.enabled = YES;
     }
 }
 
 - (IBAction)didTapButton:(id)sender {
-//#if USE_CUSTOM_CONFIG
+
     [self presentPlaidLinkWithCustomConfiguration];
-//#else
-   // [self presentPlaidLinkWithSharedConfiguration];
-//#endif
+
 }
 -(void) getBalances {
   
@@ -154,7 +154,7 @@ static const NSString * urlDef = @"http://ebfd01e7.ngrok.io";
 
 - (void)handleExitWithMetadata:(NSDictionary<NSString*,id>*)metadata {
     NSString* message = [NSString stringWithFormat:@"metadata: %@", metadata];
-    [self presentAlertViewWithTitle:@"Exit" message:message];
+    [self dismissViewControllerAnimated:true completion:nil];
 }
 
 - (void)presentAlertViewWithTitle:(NSString*)title message:(NSString*)message {

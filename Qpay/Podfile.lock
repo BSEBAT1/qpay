@@ -127,6 +127,7 @@ PODS:
   - nanopb/encode (0.3.9011)
   - Plaid (1.1.29)
   - Protobuf (3.11.4)
+  - SCLAlertView (0.8)
 
 DEPENDENCIES:
   - FBSDKLoginKit
@@ -136,6 +137,7 @@ DEPENDENCIES:
   - GeoFire
   - Geofirestore
   - Plaid
+  - SCLAlertView
 
 SPEC REPOS:
   trunk:
@@ -161,6 +163,7 @@ SPEC REPOS:
     - nanopb
     - Plaid
     - Protobuf
+    - SCLAlertView
 
 SPEC CHECKSUMS:
   BoringSSL: e10f92a27043805c01071fe815a5cd98ae8212e7
@@ -185,7 +188,8 @@ SPEC CHECKSUMS:
   nanopb: 18003b5e52dab79db540fe93fe9579f399bd1ccd
   Plaid: 8cebd80f77f400568028b6d66c97827b76c675f4
   Protobuf: 176220c526ad8bd09ab1fb40a978eac3fef665f7
+  SCLAlertView: 6a77bb2edfc65e04dbe57725546cb4107a506b85
 
-PODFILE CHECKSUM: e9c605914d7846823548e8e82a84449e34df6875
+PODFILE CHECKSUM: 1d1204606d9cf2c3c0a2ff523d34791706499caf
 
 COCOAPODS: 1.8.4

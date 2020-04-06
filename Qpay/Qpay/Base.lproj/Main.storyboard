@@ -23,10 +23,10 @@
                                 <rect key="frame" x="0.0" y="437" width="414" height="377"/>
                                 <subviews>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="S3w-mO-8wv">
-                                        <rect key="frame" x="0.0" y="0.0" width="414" height="384.5"/>
+                                        <rect key="frame" x="81" y="0.0" width="252.5" height="384.5"/>
                                         <subviews>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Select A Gas Station To Continue" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="zIp-U4-ZYg">
-                                                <rect key="frame" x="0.0" y="0.0" width="414" height="40"/>
+                                                <rect key="frame" x="0.0" y="0.0" width="252.5" height="40"/>
                                                 <constraints>
                                                     <constraint firstAttribute="height" constant="40" id="CdH-ey-dhQ"/>
                                                 </constraints>
@@ -35,7 +35,7 @@
                                                 <nil key="highlightedColor"/>
                                             </label>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="p2K-S3-zDU">
-                                                <rect key="frame" x="0.0" y="40" width="414" height="30"/>
+                                                <rect key="frame" x="0.0" y="40" width="252.5" height="30"/>
                                                 <constraints>
                                                     <constraint firstAttribute="height" constant="30" id="11g-vg-4gX"/>
                                                 </constraints>
@@ -44,7 +44,7 @@
                                                 <nil key="highlightedColor"/>
                                             </label>
                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Tea-8C-2hR">
-                                                <rect key="frame" x="0.0" y="130" width="414" height="45"/>
+                                                <rect key="frame" x="20" y="130" width="212.5" height="45"/>
                                                 <constraints>
                                                     <constraint firstAttribute="height" constant="45" id="DN4-FJ-Ogs"/>
                                                 </constraints>
@@ -57,18 +57,18 @@
                                         <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
                                         <constraints>
                                             <constraint firstItem="zIp-U4-ZYg" firstAttribute="leading" secondItem="S3w-mO-8wv" secondAttribute="leading" id="2ie-NY-u7n"/>
-                                            <constraint firstAttribute="trailing" secondItem="Tea-8C-2hR" secondAttribute="trailing" id="E7N-6c-uwV"/>
                                             <constraint firstItem="Tea-8C-2hR" firstAttribute="top" secondItem="p2K-S3-zDU" secondAttribute="bottom" constant="60" id="H9l-wv-ZAl"/>
                                             <constraint firstItem="p2K-S3-zDU" firstAttribute="leading" secondItem="S3w-mO-8wv" secondAttribute="leading" id="dtZ-QM-WjZ"/>
+                                            <constraint firstItem="Tea-8C-2hR" firstAttribute="leading" secondItem="S3w-mO-8wv" secondAttribute="leading" constant="20" id="eev-kg-C01"/>
                                             <constraint firstAttribute="trailing" secondItem="zIp-U4-ZYg" secondAttribute="trailing" id="epe-Ei-Ms0"/>
                                             <constraint firstItem="p2K-S3-zDU" firstAttribute="top" secondItem="zIp-U4-ZYg" secondAttribute="bottom" id="f06-OH-iPI"/>
+                                            <constraint firstAttribute="trailing" secondItem="Tea-8C-2hR" secondAttribute="trailing" constant="20" id="gdJ-Z4-MjX"/>
                                             <constraint firstAttribute="trailing" secondItem="p2K-S3-zDU" secondAttribute="trailing" id="lR7-LJ-tYy"/>
                                             <constraint firstItem="zIp-U4-ZYg" firstAttribute="top" secondItem="S3w-mO-8wv" secondAttribute="top" id="nLd-so-2yp"/>
-                                            <constraint firstItem="Tea-8C-2hR" firstAttribute="leading" secondItem="S3w-mO-8wv" secondAttribute="leading" id="naS-RY-RaN"/>
                                         </constraints>
                                     </view>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="pdb-aJ-KLp">
-                                        <rect key="frame" x="0.0" y="195" width="414" height="45"/>
+                                        <rect key="frame" x="101" y="195" width="212.5" height="45"/>
                                         <constraints>
                                             <constraint firstAttribute="height" constant="45" id="z6p-GM-jp6"/>
                                         </constraints>
@@ -79,15 +79,13 @@
                                     </button>
                                 </subviews>
                                 <constraints>
-                                    <constraint firstItem="S3w-mO-8wv" firstAttribute="leading" secondItem="OFm-f2-L7h" secondAttribute="leading" id="1xx-Gk-6NE"/>
                                     <constraint firstItem="S3w-mO-8wv" firstAttribute="centerY" secondItem="e10-FK-cOA" secondAttribute="centerY" id="CNf-vy-fAj"/>
                                     <constraint firstItem="S3w-mO-8wv" firstAttribute="centerX" secondItem="e10-FK-cOA" secondAttribute="centerX" id="T8y-XB-9sE"/>
                                     <constraint firstItem="S3w-mO-8wv" firstAttribute="top" secondItem="OFm-f2-L7h" secondAttribute="top" id="WRp-LC-FLA"/>
-                                    <constraint firstItem="pdb-aJ-KLp" firstAttribute="trailing" secondItem="OFm-f2-L7h" secondAttribute="trailing" id="XgZ-N7-rFw"/>
-                                    <constraint firstItem="OFm-f2-L7h" firstAttribute="trailing" secondItem="S3w-mO-8wv" secondAttribute="trailing" id="d68-Gs-RCz"/>
+                                    <constraint firstItem="pdb-aJ-KLp" firstAttribute="centerX" secondItem="Tea-8C-2hR" secondAttribute="centerX" id="f2B-AT-4UY"/>
+                                    <constraint firstItem="pdb-aJ-KLp" firstAttribute="width" secondItem="Tea-8C-2hR" secondAttribute="width" id="i5z-je-PW5"/>
                                     <constraint firstItem="OFm-f2-L7h" firstAttribute="bottom" secondItem="S3w-mO-8wv" secondAttribute="bottom" id="iwm-8a-C56"/>
                                     <constraint firstItem="pdb-aJ-KLp" firstAttribute="top" secondItem="Tea-8C-2hR" secondAttribute="bottom" constant="20" id="uj1-qh-n0x"/>
-                                    <constraint firstItem="pdb-aJ-KLp" firstAttribute="leading" secondItem="OFm-f2-L7h" secondAttribute="leading" id="xSU-aQ-Mmm"/>
                                 </constraints>
                                 <viewLayoutGuide key="contentLayoutGuide" id="8Ss-gi-d3W"/>
                                 <viewLayoutGuide key="frameLayoutGuide" id="OFm-f2-L7h"/>

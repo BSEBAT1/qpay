@@ -9,6 +9,7 @@
 import UIKit
 import Firebase
 import FBSDKCoreKit
+import LinkKit
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -19,6 +20,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Override point for customization after application launch.
     ApplicationDelegate.shared.application(application, didFinishLaunchingWithOptions: launchOptions)
         FirebaseApp.configure()
+        setupPlaidWithCustomConfiguration()
         return true
     }
     
@@ -47,5 +49,27 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func applicationWillTerminate(_ application: UIApplication) {
         // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
     }
+    
+    // MARK: Plaid Link setup with custom configuration
+       func setupPlaidWithCustomConfiguration() {
+           // <!-- SMARTDOWN_SETUP_CUSTOM -->
+           // With custom configuration
+           let linkConfiguration = PLKConfiguration(key: "948b0f0032f2f5de71ff8632cd5848", env: .development, product: .auth)
+           linkConfiguration.clientName = "Qpay"
+           PLKPlaidLink.setup(with: linkConfiguration) { (success, error) in
+               if (success) {
+                   // Handle success here, e.g. by posting a notification
+                   NSLog("Plaid Link setup was successful")
+                   NotificationCenter.default.post(name: NSNotification.Name(rawValue: "PLDPlaidLinkSetupFinished"), object: self)
+               }
+               else if let error = error {
+                   NSLog("Unable to setup Plaid Link due to: \(error.localizedDescription)")
+               }
+               else {
+                   NSLog("Unable to setup Plaid Link")
+               }
+           }
+           // <!-- SMARTDOWN_SETUP_CUSTOM -->
+       }
 }
 

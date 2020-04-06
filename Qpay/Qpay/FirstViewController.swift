@@ -12,6 +12,7 @@ import Firebase
 import Geofirestore
 import CoreLocation
 import MapKit
+import SCLAlertView
 
 class FirstViewController: UIViewController {
     var plaidPresented = true
@@ -38,6 +39,28 @@ class FirstViewController: UIViewController {
         setupMap()
         Utilities.styleFilledButton(buyGasButton)
         Utilities.styleFilledButton(getDirectionButton)
+        if !(UserDefaults.standard.bool(forKey: "registered")){
+            let appearance = SCLAlertView.SCLAppearance(
+                      kTitleFont: UIFont(name: "HelveticaNeue", size: 20)!,
+                      kTextFont: UIFont(name: "HelveticaNeue", size: 14)!,
+                      kButtonFont: UIFont(name: "HelveticaNeue-Bold", size: 14)!,
+                      showCloseButton: false,
+                      dynamicAnimatorActive: true,
+                      buttonsLayout: .vertical
+                  )
+                  let alert = SCLAlertView(appearance: appearance)
+                  _ = alert.addButton("Register", target:self, selector:#selector(FirstViewController.registerPressed))
+                  _ = alert.addButton("Close") {
+                    alert.dismiss(animated: true, completion: nil)
+                    }
+            
+            guard let icon = UIImage(named:"Button") else {
+                return
+            }
+                  let color = UIColor.orange
+
+                  _ = alert.showCustom("Register", subTitle: "Link with our secure system to begin paying for gas at our discounted rate!", color: color, icon: icon)
+        }
     }
     
     
@@ -101,22 +124,28 @@ class FirstViewController: UIViewController {
     override func viewWillDisappear(_ animated: Bool) {
         Auth.auth().removeStateDidChangeListener(handle!)
     }
-    func showLocationsAlert() {
-        let alertController = UIAlertController (title:"Qpay Needs Your Permission", message:"We need location services to show you a map of gas stations in your area" , preferredStyle: .alert)
-
-                   let settingsAction = UIAlertAction(title: NSLocalizedString("settings", comment: ""), style: .default) { (_) -> Void in
-                       guard let settingsUrl = URL(string: UIApplication.openSettingsURLString) else {
-                           return
-                       }
-                       if UIApplication.shared.canOpenURL(settingsUrl) {
-                           UIApplication.shared.open(settingsUrl, options: [:], completionHandler: nil)
-                       }
-                   }
-                   alertController.addAction(settingsAction)
-                   let cancelAction = UIAlertAction(title: NSLocalizedString("cancel", comment: ""), style: .default, handler: nil)
-                   alertController.addAction(cancelAction)
-
-                   present(alertController, animated: true, completion: nil)
+     func showLocationsAlert() {
+        
+        let appearance = SCLAlertView.SCLAppearance(
+            kTitleFont: UIFont(name: "HelveticaNeue", size: 20)!,
+            kTextFont: UIFont(name: "HelveticaNeue", size: 14)!,
+            kButtonFont: UIFont(name: "HelveticaNeue-Bold", size: 14)!,
+            showCloseButton: false,
+            dynamicAnimatorActive: true,
+            buttonsLayout: .vertical
+        )
+        let alert = SCLAlertView(appearance: appearance)
+        _ = alert.addButton("Open Settings") {
+            guard let settingsUrl = URL(string: UIApplication.openSettingsURLString) else {
+                return
+            }
+            if UIApplication.shared.canOpenURL(settingsUrl) {
+                UIApplication.shared.open(settingsUrl, options: [:], completionHandler: nil)
+            }
+        }
+        _ = alert.addButton("Close") {
+          alert.dismiss(animated: true, completion: nil)
+          }
     }
     @IBAction func buyGasPressed(_ sender: Any) {
     }
@@ -130,6 +159,15 @@ class FirstViewController: UIViewController {
          let mapItem = MKMapItem(placemark: placemark)
         mapItem.name = selected.title ?? "Gas Station" // Provide the name of the destination in the To: field
         mapItem.openInMaps(launchOptions: options)
+    }
+    
+    @objc func registerPressed() {
+        let plaid = UIStoryboard(name: "Plaid", bundle: nil)
+                                if let plaidView = plaid.instantiateViewController(withIdentifier: "plaid") as? ViewController {
+                                    plaidView.modalPresentationStyle = .fullScreen
+                                    self.present(plaidView, animated: false, completion: nil)
+                                  plaidPresented = true
+                                }
     }
 }
 
