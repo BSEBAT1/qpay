@@ -39,6 +39,10 @@ extension CustomerTableViewController: UITableViewDelegate,UITableViewDataSource
         return 100;
     }
     
+    func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+        return "Please Select An Account For Debits"
+    }
+    
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let selectedCustomer = customerData[indexPath.row]
         dataTask?.cancel()

@@ -40,24 +40,29 @@ class FirstViewController: UIViewController {
         Utilities.styleFilledButton(buyGasButton)
         Utilities.styleFilledButton(getDirectionButton)
         if !(UserDefaults.standard.bool(forKey: "registered")){
+            
+//            kDefaultShadowOpacity: CGFloat = 0.7, kCircleTopPosition: CGFloat = 0.0, kCircleBackgroundTopPosition: CGFloat = 6.0, kCircleHeight: CGFloat = 56.0, kCircleIconHeight: CGFloat = 20.0, kTitleTop:CGFloat = 30.0, kTitleHeight:CGFloat = 25.0,  kWindowWidth: CGFloat = 240.0, kWindowHeight: CGFloat = 178.0, kTextHeight: CGFloat = 90.0, kTextFieldHeight: CGFloat = 45.0, kTextViewdHeight: CGFloat = 80.0, kButtonHeight: CGFloat = 45.0, kTitleFont: UIFont = UIFont.systemFont(ofSize: 20), kTitleMinimumScaleFactor: CGFloat = 1.0, kTextFont: UIFont = UIFont.systemFont(ofSize: 14), kButtonFont: UIFont = UIFont.boldSystemFont(ofSize: 14), showCloseButton: Bool = true, showCircularIcon: Bool = true, shouldAutoDismiss: Bool = true, contentViewCornerRadius: CGFloat = 5.0, fieldCornerRadius: CGFloat = 3.0, buttonCornerRadius: CGFloat = 3.0, hideWhenBackgroundViewIsTapped: Bool = false, circleBackgroundColor: UIColor = UIColor.white, contentViewColor: UIColor = UIColorFromRGB( ), contentViewBorderColor: UIColor = UIColorFromRGB(0xCCCCCC), titleColor: UIColor = UIColorFromRGB(0x4D4D4D), dynamicAnimatorActive: Bool = false, disableTapGesture: Bool = false, buttonsLayout: SCLAlertButtonLayout = .vertical, activityIndicatorStyle: UIActivityIndicatorViewStyle = .white
+            
             let appearance = SCLAlertView.SCLAppearance(
                       kTitleFont: UIFont(name: "HelveticaNeue", size: 20)!,
                       kTextFont: UIFont(name: "HelveticaNeue", size: 14)!,
                       kButtonFont: UIFont(name: "HelveticaNeue-Bold", size: 14)!,
                       showCloseButton: false,
+                      circleBackgroundColor: UIColor.white,
                       dynamicAnimatorActive: true,
                       buttonsLayout: .vertical
                   )
+         
                   let alert = SCLAlertView(appearance: appearance)
                   _ = alert.addButton("Register", target:self, selector:#selector(FirstViewController.registerPressed))
                   _ = alert.addButton("Close") {
                     alert.dismiss(animated: true, completion: nil)
                     }
             
-            guard let icon = UIImage(named:"Button") else {
+            guard let icon = UIImage(named:"map") else {
                 return
             }
-                  let color = UIColor.orange
+                  let color = UIColor(red:0.35, green:0.69, blue:1.00, alpha:1.00)
 
                   _ = alert.showCustom("Register", subTitle: "Link with our secure system to begin paying for gas at our discounted rate!", color: color, icon: icon)
         }
@@ -199,6 +204,7 @@ extension FirstViewController: MKMapViewDelegate {
                 let annotation = MKPointAnnotation()
                 annotation.coordinate = location.coordinate
                 annotation.title = title
+                
                 self.customerMap.addAnnotation(annotation)
                 
             }
@@ -228,9 +234,14 @@ extension FirstViewController: MKMapViewDelegate {
 
         if let annotationView = annotationView {
             // Configure your annotation view here
-            annotationView.canShowCallout = true
-            
-            annotationView.image = UIImage(named: "Button")
+            annotationView.canShowCallout = false
+            let pinImage = UIImage(named: "map")
+            let size = CGSize(width: 50, height: 50)
+            UIGraphicsBeginImageContext(size)
+            pinImage!.draw(in: CGRect(x: 0, y: 0, width: size.width, height: size.height))
+            let resizedImage = UIGraphicsGetImageFromCurrentImageContext()
+
+            annotationView.image = resizedImage
         }
 
         return annotationView

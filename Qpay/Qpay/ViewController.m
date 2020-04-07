@@ -102,14 +102,19 @@ static const NSString * urlDef = @"http://ebfd01e7.ngrok.io";
         [accountObjects addObject:account];
     }
         [self dismissViewControllerAnimated:true completion:^{
-            UIViewController * root =  [[UIApplication.sharedApplication keyWindow]rootViewController];
+            UIViewController *yourCurrentViewController = [UIApplication sharedApplication].keyWindow.rootViewController;
+
+            while (yourCurrentViewController.presentedViewController)
+            {
+               yourCurrentViewController = yourCurrentViewController.presentedViewController;
+            }
+            
             NSString * storyboardName = @"Plaid";
             UIStoryboard *storyboard = [UIStoryboard storyboardWithName:storyboardName bundle: nil];
             CustomerTableViewController * vc = [storyboard instantiateViewControllerWithIdentifier:@"showCustomerAccounts"];
             vc.customerData = [accountObjects copy];
-            [root presentViewController:vc animated:true completion:^{
-                NSLog(@"customer accounts pressed");
-            }];
+            vc.modalPresentationStyle = UIModalPresentationFullScreen;
+             [yourCurrentViewController presentViewController:vc animated:YES completion:nil];
         }];
     
 //    NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"%@%@",urlDef,@"/get_access_token"]];
@@ -207,7 +212,7 @@ static const NSString * urlDef = @"http://ebfd01e7.ngrok.io";
     PLKConfiguration* linkConfiguration;
     @try {
         linkConfiguration = [[PLKConfiguration alloc] initWithKey:@"948b0f0032f2f5de71ff8632cd5848" env:PLKEnvironmentDevelopment product:PLKProductAuth];
-        linkConfiguration.clientName = @"Link Demo";
+        linkConfiguration.clientName = @"Qpay";
         id<PLKPlaidLinkViewDelegate> linkViewDelegate  = self;
         PLKPlaidLinkViewController* linkViewController = [[PLKPlaidLinkViewController alloc] initWithConfiguration:linkConfiguration delegate:linkViewDelegate];
         if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) {
